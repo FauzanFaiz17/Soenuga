@@ -67,3 +67,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .wrapper {
+    @apply max-w-5xl w-full p-5 lg:mx-auto lg:p-10;
+  }
+}
