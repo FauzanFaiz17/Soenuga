@@ -1,0 +1,25 @@
+<div id="drawer-edit"
+ class="fixed top-0 right-0 z-40 w-full h-screen max-w-xs p-4 bg-white dark:bg-gray-800">
+
+<h5 class="mb-6 text-sm font-semibold uppercase">
+ Edit Data
+</h5>
+
+<form id="editForm" method="post">
+ {% csrf_token %}
+
+ <div id="editFields"></div>
+
+ <div class="flex space-x-3 mt-4">
+
+  <button type="submit"
+   class="w-full bg-blue-700 text-white py-2.5 rounded-lg">
+
+   Update
+  </button>
+
+ </div>
+
+</form>
+
+</div>

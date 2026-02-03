@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Surat</title>
+    <style>
+        body { font-family: sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h2>Laporan Surat Masuk</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nomor</th>
+                <th>Perihal</th>
+                <th>Jenis</th>
+                <th>Tanggal</th>
+                <th>Pengirim</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for surat in data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ surat.nomor }}</td>
+                <td>{{ surat.perihal }}</td>
+                <td>{{ surat.jenis }}</td>
+                <td>{{ surat.tanggal|date:"d-m-Y" }}</td>
+                <td>{{ surat.pengirim }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

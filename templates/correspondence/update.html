@@ -1,0 +1,39 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
+            {{ title|default:"Tambah Data Surat" }}
+        </h1>
+
+        <div class="col-span-2 mt-6">
+            <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-6 gap-6">
+                        {% for field in form %}
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="{{ field.id_for_label }}"
+                                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="mt-1 text-sm text-red-500">{{ field.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit"
+                        class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg">
+                        {{ submit_text|default:"Simpan Surat" }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
