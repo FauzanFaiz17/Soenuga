@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+
+{% comment %} {% block extrastyle %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css">
+
+{% endblock extrastyle %} {% endcomment %}
+
+{% block content %}
+
+{% load dict_extras %}
+
+<h2 class="text-xl font-semibold mb-6">
+  Hak Akses: {{ role.name }}
+</h2>
+
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+
+  {% for app_label, perms in grouped_permissions.items %}
+    <div class="border rounded-lg p-4 shadow-sm bg-white  border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700"">
+      <h3 class="font-semibold text-lg mb-3 capitalize">
+        {{ app_label }}
+      </h3>
+
+      <div class="space-y-2">
+        {% for perm in perms %}
+          <div class="flex items-center justify-between">
+            <label class="flex items-center space-x-2">
+              <input type="checkbox"
+                     name="permissions"
+                     value="{{ perm.id }}"
+                     {% if perm.id in role_permissions %}checked{% endif %}>
+              <span class="text-sm">{{ perm.name }}</span>
+            </label>
+
+            <select name="scope_{{ perm.id }}"
+                    class="border rounded px-2 py-1 text-xs">
+              {% for s in scopes %}
+                <option value="{{ s }}"
+                  {% if role_permissions|get_item:perm.id == s %}selected{% endif %}>
+                  {{ s|title }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="pt-4">
+    <button type="submit"
+            class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+      Simpan Hak Akses
+    </button>
+  </div>
+</form>
+{% endblock content %}

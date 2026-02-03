@@ -1,0 +1,79 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  {% include "includes/head.html" %}
+  {% block extrastyle %}{% endblock extrastyle %}
+
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-800">
+
+   <!-- Floating Messages -->
+  {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-2">
+      {% for message in messages %}
+        <div class="flex items-center p-4 text-sm rounded-lg shadow-lg 
+                    dark:bg-gray-800 {{ message.tags }} transition transform duration-500"
+             role="alert">
+          <!-- Icon -->
+          <svg class="flex-shrink-0 inline w-4 h-4 mr-3" aria-hidden="true"
+               xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 
+                     4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 
+                     15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 
+                     1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+          </svg>
+          <span class="sr-only">Info</span>
+          <div>{{ message }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <!-- End Floating Messages -->
+  {% block navigation %}
+    {% include "includes/navigation.html" %}
+  {% endblock navigation %}
+
+  <div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
+
+    {% block sidebar %}
+      {% include "includes/sidebar.html" %}
+    {% endblock sidebar %}
+
+    <div class="fixed inset-0 z-10 hidden bg-gray-900/50 dark:bg-gray-900/90" id="sidebarBackdrop"></div>
+
+    <div id="main-content" class="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
+      {% block content %}{% endblock content %}
+      {% block footer %}
+        {% include "includes/footer.html" %}
+      {% endblock footer %}
+      <p class="my-10 text-sm text-center text-gray-500">
+        &copy; Flowbite - Coded by <a href="https://appseed.us" class="hover:underline" target="_blank">AppSeed</a>
+      </p>
+
+    </div>
+  </div>
+
+
+  {% include "includes/scripts.html" %}
+  {% block extra_js %}{% endblock extra_js %}
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const alerts = document.querySelectorAll('[role="alert"]');
+      alerts.forEach((alert) => {
+        setTimeout(() => {
+          alert.classList.add("opacity-0", "translate-x-10");
+          setTimeout(() => alert.remove(), 500); // hapus dari DOM setelah animasi
+        }, 4000); // tampil 4 detik
+      });
+    });
+  </script>
+
+</body>
+
+</html>

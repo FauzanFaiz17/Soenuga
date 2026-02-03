@@ -1,0 +1,42 @@
+<div id="drawer-role-form"
+  class="fixed top-0 right-0 z-40 w-full h-screen max-w-xs p-4 overflow-y-auto transition-transform translate-x-full bg-white dark:bg-gray-800"
+  tabindex="-1">
+
+  <h5 class="mb-6 text-sm font-semibold text-gray-500 uppercase dark:text-gray-400">
+    {{ group|yesno:"Edit Role,Add Role" }}
+  </h5>
+
+  <button type="button" data-drawer-dismiss="drawer-role-form"
+    class="absolute top-2.5 right-2.5 text-gray-400 hover:bg-gray-200 rounded-lg p-1.5">
+    ✕
+  </button>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="space-y-4">
+      {% for field in form %}
+        <div>
+          <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            {{ field.label }}
+          </label>
+          {{ field }}
+          {% if field.errors %}
+            <p class="text-sm text-red-500">{{ field.errors|striptags }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="flex gap-2 mt-6">
+      <button type="submit"
+        class="w-full text-white bg-blue-700 hover:bg-blue-800 rounded-lg px-5 py-2.5">
+        {{ group|yesno:"Update,Save" }}
+      </button>
+
+      <button type="button" data-drawer-dismiss="drawer-role-form"
+        class="w-full border rounded-lg px-5 py-2.5">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,28 @@
+<h2>Manajemen Akses: {{ role.name }}</h2>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% for perm in permissions %}
+    <div>
+      <label>
+        <input type="checkbox"
+               name="permissions"
+               value="{{ perm.id }}"
+               {% if perm.id in role_permissions %}checked{% endif %}>
+        {{ perm.name }}
+      </label>
+
+      <select name="scope_{{ perm.id }}">
+        {% for key,label in scope_choices %}
+          <option value="{{ key }}"
+            {% if role_permissions|get_item:perm.id == key %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  {% endfor %}
+
+  <button type="submit">Simpan</button>
+</form>

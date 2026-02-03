@@ -1,0 +1,201 @@
+{% extends "layouts/base-auth.html" %}
+{% load static %}
+
+{% block content %}
+
+    <div class="flex flex-col items-center justify-center px-6 pt-8 mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">
+        <a href="/" class="flex items-center justify-center mb-8 text-2xl font-semibold lg:mb-10 dark:text-white">
+            <img src="https://flowbite-admin-dashboard.vercel.app/images/logo.svg" class="mr-4 h-11" alt="FlowBite Logo">
+            <span>Rocket Django</span>  
+        </a>
+        <!-- Card -->
+        <div class="w-full max-w-xl p-6 space-y-8 sm:p-8 bg-white rounded-lg shadow dark:bg-gray-800">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                Register
+            </h2>
+            <form method="post" class="mt-8 space-y-6">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ field.label }}
+                        </label>
+
+                        <div class="relative">
+
+                            {{ field }}
+
+                            {% if field.name == "password1" or field.name == "password2" %}
+                            <button type="button"
+                                onclick="togglePassword('{{ field.id_for_label }}')"
+                                class="absolute right-3 top-2.5 text-sm text-gray-500 hover:text-gray-700">
+                                👁
+                            </button>
+                            {% endif %}
+
+                        </div>
+
+                        {% if field.name == "password1" %}
+                        <button type="button"
+                            onclick="openPasswordModal()"
+                            class="mt-2 px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700">
+                            Generate Password
+                        </button>
+                        {% endif %}
+
+                        <span class="block text-red-600 mt-2 text-sm">
+                            {{ field.errors }}
+                        </span>
+                    </div>
+                    {% endfor %}
+
+
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="remember" aria-describedby="remember" name="remember" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="remember" class="font-medium text-gray-900 dark:text-white">I accept the <a href="#" class="text-primary-700 hover:underline dark:text-primary-500">Terms and Conditions</a></label>
+                    </div>
+                </div>
+                <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Create account</button>
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <a href="" class="text-primary-700 hover:underline dark:text-primary-500">Sign IN</a>
+                    &nbsp; &bull; &nbsp; 
+                    <a href="https://app-generator.dev/docs/products/django/rocket/index.html"
+                       class="text-primary-700 hover:underline dark:text-primary-500">Documentation</a>                    
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PASSWORD MODAL -->
+<div id="passwordModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-md">
+
+        <h3 class="text-xl font-bold mb-4 dark:text-white">
+            Generated Password
+        </h3>
+
+        <div class="flex items-center mb-4">
+            <input id="generatedPassword"
+                type="text"
+                readonly
+                class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 dark:text-white">
+
+            <button onclick="copyPassword()"
+                class="ml-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                📋
+            </button>
+        </div>
+
+        <div class="flex justify-between">
+
+            <button onclick="generateNewPassword()"
+                class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                🔁 Generate
+            </button>
+
+            <div>
+                <button onclick="closePasswordModal()"
+                    class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 mr-2">
+                    Cancel
+                </button>
+
+                <button onclick="usePassword()"
+                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    Use
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+
+/* GENERATOR */
+function createPassword(length = 12) {
+
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+        "abcdefghijklmnopqrstuvwxyz" +
+        "0123456789" +
+        "!@#$%^&*()_+";
+
+    let pass = "";
+
+    for (let i = 0; i < length; i++) {
+        pass += chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    return pass;
+}
+
+
+/* MODAL CONTROL */
+function openPasswordModal() {
+    document.getElementById("passwordModal").classList.remove("hidden");
+    generateNewPassword();
+}
+
+function closePasswordModal() {
+    document.getElementById("passwordModal").classList.add("hidden");
+}
+
+
+/* GENERATE */
+function generateNewPassword() {
+
+    const password = createPassword();
+
+    document.getElementById("generatedPassword").value = password;
+}
+
+
+/* COPY */
+function copyPassword() {
+
+    const input = document.getElementById("generatedPassword");
+
+    input.select();
+    document.execCommand("copy");
+
+    alert("Password copied!");
+}
+
+
+/* USE PASSWORD */
+function usePassword() {
+
+    const password =
+        document.getElementById("generatedPassword").value;
+
+    document.getElementById("id_password1").value = password;
+    document.getElementById("id_password2").value = password;
+
+    closePasswordModal();
+}
+
+
+/* SHOW / HIDE */
+function togglePassword(id) {
+
+    const input = document.getElementById(id);
+
+    if (input.type === "password") {
+        input.type = "text";
+    } else {
+        input.type = "password";
+    }
+}
+
+</script>
+
+{% endblock content %}
