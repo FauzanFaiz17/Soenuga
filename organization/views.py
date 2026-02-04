@@ -104,7 +104,7 @@ def manage_role_permissions(request, role_id):
 
     # permissions tetap SATU sumber (ini penting)
     permissions = Permission.objects.filter(
-        content_type__app_label__in=["users", "organization","correspondence"]
+        content_type__app_label__in=["users", "organization","correspondence","inventory"]
     ).select_related("content_type")
 
     scopes = ["global", "unit", "department", "self"]

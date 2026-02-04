@@ -1,0 +1,11 @@
+# Abaikan file .env
+# .env
+
+# Abaikan seluruh folder media
+media/
+
+# Abaikan semua file log
+# *.log
+
+# Abaikan file tertentu di folder spesifik
+# folder_rahasia/config.php

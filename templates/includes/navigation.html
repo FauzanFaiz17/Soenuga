@@ -20,8 +20,19 @@
             </svg>
           </button>
           <a href="/" class="flex ml-2 md:mr-24">
-            <img src="{% static 'images/soe.png' %}" class="h-8 mr-3"
-              alt="FlowBite Logo" />
+                <!-- Logo Light -->
+              <img 
+                  src="{% static 'images/new2.png' %}" 
+                  class="h-8 mr-3 dark:hidden"
+                  alt="Logo Light"
+              />
+
+              <!-- Logo Dark -->
+              <img 
+                  src="{% static 'images/new.png' %}" 
+                  class="h-8 mr-3 hidden dark:block"
+                  alt="Logo Dark"
+              />
             <span
               class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Soenuga</span>
           </a>

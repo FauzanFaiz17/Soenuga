@@ -26,6 +26,7 @@ urlpatterns = [
     path('', include("users.urls")),
     path('m/', include("organization.urls")),
     path('', include("correspondence.urls")),
+    path('', include("inventory.urls")),
 ]
 
 if settings.DEBUG:

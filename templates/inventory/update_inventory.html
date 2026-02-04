@@ -1,0 +1,166 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block messages %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="flex items-center p-4 text-sm rounded-lg dark:bg-gray-800 {{message.tags}}" role="alert">
+            <svg class="flex-shrink-0 inline w-4 h-4 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+            </svg>
+            <span class="sr-only">Info</span>
+            <div>{{ message }}</div>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock messages %}
+
+{% block content %}
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Update Inventaris</h1>
+        <div class="col-span-2">
+            <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">Informasi Inventaris</h3>
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                        <h2 class="text-lg font-semibold mb-4 dark:text-white">Data Inventaris</h2>
+                        <div class="grid grid-cols-6 gap-6">
+                        {% for field in inventory_form %}
+                            <div class="col-span-6 sm:col-span-3">
+                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                        <h2 class="text-lg font-semibold mb-4 dark:text-white">Foto Inventaris</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            {% for foto in inventory.fotos.all %}
+                            <div id="foto-{{ foto.id }}" class="relative group">
+                              <img src="{{ foto.foto.url }}" class="w-full h-32 object-cover rounded shadow" alt="Foto Inventory">
+                              <button data-foto-id="{{ foto.id }}" class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-full p-1 delete-foto">&times;</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-4">
+                            {{ foto_form.foto.label_tag }}
+                            {{ foto_form.foto }}
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tambah foto baru (boleh banyak sekaligus)</p>
+                            <div id="preview" class="mt-4 grid grid-cols-3 gap-4"></div>
+                        </div>
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                        Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.querySelector('input[name="foto"]');
+  const preview = document.getElementById("preview");
+  if (input) {
+    input.addEventListener("change", () => {
+      preview.innerHTML = "";
+      Array.from(input.files).forEach(file => {
+        if (!file.type.startsWith("image/")) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.className = "w-full h-32 object-cover rounded-lg shadow";
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+
+  document.querySelectorAll('.delete-foto').forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      const fotoId = this.dataset.fotoId;
+      const url = `/delete-foto/${fotoId}/`;
+      if (confirm("Yakin ingin menghapus foto ini?")) {
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById(`foto-${fotoId}`).remove();
+          } else {
+            alert(data.error || 'Gagal menghapus foto.');
+          }
+        });
+      }
+    });
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const tipeSelect = document.querySelector('select[name="tipe"]');
+
+    const habisField   = document.querySelector('input[name="habis"]')?.closest('div');
+    const dipakaiField = document.querySelector('input[name="dipakai"]')?.closest('div');
+    const rusakField   = document.querySelector('input[name="rusak"]')?.closest('div');
+
+    function updateFields() {
+
+        const tipe = tipeSelect.value;
+
+        if (tipe === 'consumable') {
+
+            // tampilkan habis
+            habisField.style.display = 'block';
+
+            // sembunyikan asset field
+            dipakaiField.style.display = 'none';
+            rusakField.style.display   = 'none';
+
+            // reset nilai
+            document.querySelector('input[name="dipakai"]').value = 0;
+            document.querySelector('input[name="rusak"]').value = 0;
+
+        }
+
+        else if (tipe === 'asset') {
+
+            // tampilkan asset field
+            dipakaiField.style.display = 'block';
+            rusakField.style.display   = 'block';
+
+            // sembunyikan habis
+            habisField.style.display = 'none';
+
+            // reset nilai
+            document.querySelector('input[name="habis"]').value = 0;
+        }
+    }
+
+    // trigger saat load
+    updateFields();
+
+    // trigger saat ganti tipe
+    tipeSelect.addEventListener('change', updateFields);
+
+});
+</script>
+
+{% endblock extra_js %}

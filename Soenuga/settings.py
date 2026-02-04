@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'organization',
     'users',
     'correspondence',
+    'inventory',
 ]
 
 MIDDLEWARE = [
