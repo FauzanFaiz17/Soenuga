@@ -1,0 +1,229 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block messages %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="flex items-center p-4 text-sm rounded-lg dark:bg-gray-800 {% if message.tags %}{{ message.tags }}{% else %}bg-blue-50 text-blue-800 dark:bg-gray-800 dark:text-blue-400{% endif %}" role="alert">
+            <svg class="flex-shrink-0 inline w-4 h-4 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+            </svg>
+            <span class="sr-only">Info</span>
+            <div>{{ message }}</div>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock messages %}
+
+{% block content %}
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <!-- Breadcrumb -->
+    <div class="mb-4 col-span-full xl:mb-2">
+        <nav class="flex mb-5" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
+              <li class="inline-flex items-center">
+                <a href="{% url 'event_list' %}" class="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white">
+                  <svg class="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                  Events
+                </a>
+              </li>
+              <li>
+                <div class="flex items-center">
+                  <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                  <span class="ml-1 text-gray-400 md:ml-2 dark:text-gray-500" aria-current="page">{{ event.name }}</span>
+                </div>
+              </li>
+            </ol>
+        </nav>
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">{{ event.name }}</h1>
+            <div class="flex gap-2">
+                <a href="{% url 'event_edit' event.pk %}" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700">
+                    Edit
+                </a>
+                <a href="{% url 'event_delete' event.pk %}" class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-red-600 dark:hover:bg-red-700">
+                    Delete
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Information Card -->
+    <div class="col-span-full xl:col-span-2">
+        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">General Information</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="grid grid-cols-6 gap-6">
+                    {% for field in form %}
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="{{ field.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-500">{{ field.errors|join:", " }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="col-span-6">
+                        <button type="submit" class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Status Card -->
+    <div class="col-span-full xl:col-span-1">
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <h3 class="mb-4 text-lg font-semibold dark:text-white">Event Details</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Type</p>
+                    <p class="text-sm font-medium {% if event.tipe == 'kegiatan' %}text-blue-600{% else %}text-purple-600{% endif %} dark:text-blue-400">
+                        {{ event.get_tipe_display }}
+                    </p>
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Status</p>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if event.status == 'upcoming' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+                        {% elif event.status == 'ongoing' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                        {% elif event.status == 'completed' %}bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300
+                        {% elif event.status == 'cancelled' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                        {% endif %}">
+                        {{ event.get_status_display }}
+                    </span>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Created By</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ event.created_by.get_full_name|default:event.created_by.username }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Created At</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ event.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Updated At</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ event.updated_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants/Panitia Section -->
+    <div class="col-span-full">
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold dark:text-white">
+                    {% if participant_type == 'panitia' %}
+                        Panitia ({{ participants.count }})
+                    {% else %}
+                        Peserta ({{ participants.count }})
+                    {% endif %}
+                </h3>
+                <a href="{% if participant_type == 'panitia' %}{% url 'event_participant_add' event.pk %}{% else %}{% url 'activity_participant_add' event.pk %}{% endif %}"
+                    class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-primary-600 dark:hover:bg-primary-700">
+                    Add {{ participant_type|title }}
+                </a>
+            </div>
+
+            {% if participants %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Name</th>
+                            {% if participant_type == 'panitia' %}
+                                <th scope="col" class="px-6 py-3">Role</th>
+                            {% else %}
+                                <th scope="col" class="px-6 py-3">Type</th>
+                                <th scope="col" class="px-6 py-3">Status</th>
+                            {% endif %}
+                            <th scope="col" class="px-6 py-3">Joined At</th>
+                            <th scope="col" class="px-6 py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for participant in participants %}
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                {% if participant.user %}
+                                    {{ participant.user.get_full_name|default:participant.user.username }}
+                                {% else %}
+                                    Unit: {{ participant.unit.name }}
+                                {% endif %}
+                            </td>
+                            {% if participant_type == 'panitia' %}
+                                <td class="px-6 py-4">
+                                    {% if participant.role %}
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium dark:bg-blue-900 dark:text-blue-300">
+                                            {{ participant.role.name }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-gray-400">—</span>
+                                    {% endif %}
+                                </td>
+                            {% else %}
+                                <td class="px-6 py-4">
+                                    {% if participant.unit %}
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-medium dark:bg-purple-900 dark:text-purple-300">
+                                            Unit
+                                        </span>
+                                    {% else %}
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium dark:bg-blue-900 dark:text-blue-300">
+                                            User
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if participant.status == 'hadir' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+                                        {% elif participant.status == 'absen' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                                        {% elif participant.status == 'izin' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+                                        {% endif %}">
+                                        {{ participant.get_status_display }}
+                                    </span>
+                                </td>
+                            {% endif %}
+                            <td class="px-6 py-4 text-xs text-gray-400">
+                                {{ participant.date_joined|date:"M d, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                {% if participant_type == 'panitia' %}
+                                    <a href="{% url 'event_participant_delete' participant.pk %}" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200">
+                                        Delete
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'activity_participant_edit' participant.pk %}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 mr-4">
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'activity_participant_delete' participant.pk %}" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200">
+                                        Delete
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center text-gray-500 dark:text-gray-400 py-4">
+                Belum ada {{ participant_type }} untuk event ini.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
