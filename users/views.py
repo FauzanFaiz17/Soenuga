@@ -48,7 +48,7 @@ def register(request):
 
 def signin(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')  # nanti kita atur
+        return redirect('dashboard') 
 
     if request.method == 'POST':
         form = SigninForm(request, data=request.POST)
@@ -60,7 +60,7 @@ def signin(request):
     else:
         form = SigninForm()
 
-    return render(request, 'authentication/sign-up.html', {
+    return render(request, 'authentication/sign-in.html', {
         'form': form
     })
 

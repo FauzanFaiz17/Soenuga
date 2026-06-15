@@ -153,6 +153,10 @@ def manage_role_permissions(request, role_id):
 
 
 
+@login_required
+def test(request):
+
+    return render(request, 'test.html')
 
 
 @login_required
@@ -176,44 +180,23 @@ def index(request):
             'search_query': query,
         })
 
-# @login_required
-# @user_passes_test(lambda u: u.is_superuser)
-# def manage_role_permissions(request, role_id):
-#     role = Group.objects.get(id=role_id)
-#     permissions = Permission.objects.all()
 
-#     if request.method == 'POST':
-#         RolePermission.objects.filter(role=role).delete()
+def list_user(request):
+    query = request.GET.get('search', '')  # Ambil query search dari input
+    user_list = User.objects.all()
 
-#         for perm_id in request.POST.getlist('permissions'):
-#             scope = request.POST.get(f'scope_{perm_id}', 'global')
-#             RolePermission.objects.create(
-#                 role=role,
-#                 permission_id=perm_id,
-#                 scope=scope
-#             )
+    if query:
+        user_list = user_list.filter(
+            Q(username__icontains=query) |
+            Q(email__icontains=query)
+        )
 
-#         messages.success(request, "Hak akses berhasil diperbarui")
-#         return redirect('manage_role_permissions', role_id=role.id)
+    paginator = Paginator(user_list, 10)  # 10 item per halaman
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-#     role_permissions = {
-#         rp.permission_id: rp.scope
-#         for rp in RolePermission.objects.filter(role=role)
-#     }
 
-#     return render(request, 'admin/role_permissions.html', {
-#         'role': role,
-#         'permissions': permissions,
-#         'role_permissions': role_permissions,
-#     })
-
-@login_required
-def delete_user(request, user_id):
-    target = User.objects.get(id=user_id)
-
-    if not has_permission(request.user, "delete_user", target_user=target):
-        return HttpResponseForbidden("Tidak punya akses")
-
-    target.delete()
-    return redirect("user_list")
-
+    return render(request, 'organization/user.html' , {
+            'users': page_obj,
+            'search_query': query,
+        })
