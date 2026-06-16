@@ -1,11 +1,22 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField, PasswordChangeForm, PasswordResetForm, SetPasswordForm
-from organization.models import MemberProfile, ProgramStudi
+from organization.models import MemberProfile, ProgramStudi, Role, OrganizationUnit, Membership
 from django.contrib.auth import get_user_model
 
 
 
 User = get_user_model()
+
+
+FORM_CLASS = (
+    'shadow-sm bg-gray-50 border border-gray-300 '
+    'text-gray-900 sm:text-sm rounded-lg '
+    'focus:ring-primary-500 focus:border-primary-500 '
+    'block w-full p-2.5 '
+    'dark:bg-gray-700 dark:border-gray-600 '
+    'dark:text-white'
+)
+
 
 class SigninForm(AuthenticationForm):
     username = UsernameField(widget=forms.TextInput(attrs={
@@ -23,14 +34,10 @@ class SigninForm(AuthenticationForm):
         }),
     )
 
-
 class SignupForm(UserCreationForm):
     email = forms.EmailField(required=True)
     npm = forms.CharField(max_length=20)
-    program_studi = forms.ModelChoiceField(
-        queryset=ProgramStudi.objects.all(),
-        required=True
-    )
+
     angkatan = forms.CharField(
         max_length=2,
         help_text="Contoh: 21"
@@ -44,7 +51,6 @@ class SignupForm(UserCreationForm):
             'password1',
             'password2',
             'npm',
-            'program_studi',
             'angkatan',
         )
 
@@ -124,3 +130,70 @@ class MemberProfileForm(forms.ModelForm):
             })
 
             
+
+
+# untuk admin
+
+class MemberUserForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'nomor_telepon',
+            'is_active',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': FORM_CLASS
+            })
+
+class MemberProfileForm(forms.ModelForm):
+
+    class Meta:
+        model = MemberProfile
+        fields = (
+            'npm',
+            'angkatan',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': FORM_CLASS
+            })
+
+class MembershipForm(forms.ModelForm):
+
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.order_by('name')
+    )
+
+    unit = forms.ModelChoiceField(
+        queryset=OrganizationUnit.objects.order_by('name')
+    )
+
+    class Meta:
+        model = Membership
+        fields = (
+            'role',
+            'unit',
+            'is_active',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': FORM_CLASS
+            })

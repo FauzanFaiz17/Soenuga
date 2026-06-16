@@ -9,7 +9,7 @@ from django.http import HttpResponseForbidden
 from organization.helpers.permissions import has_permission
 from collections import defaultdict
 
-from .models import RolePermission, RoleMeta
+from .models import RolePermission, RoleMeta, Membership, OrganizationUnit, Role
 from .forms import RoleForm
 
 User = get_user_model()
@@ -104,7 +104,7 @@ def manage_role_permissions(request, role_id):
 
     # permissions tetap SATU sumber (ini penting)
     permissions = Permission.objects.filter(
-        content_type__app_label__in=["users", "organization","correspondence","inventory"]
+        content_type__app_label__in=["users", "organization","correspondence","inventory","activity","finance"]
     ).select_related("content_type")
 
     scopes = ["global", "unit", "department", "self"]

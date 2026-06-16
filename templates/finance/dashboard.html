@@ -1,0 +1,178 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Saldo Kas</h6>
+                    <h3>Rp {{ balance|intcomma }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Total Pemasukan</h6>
+                    <h3>Rp {{ income|intcomma }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Total Pengeluaran</h6>
+                    <h3>Rp {{ expense|intcomma }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Tunggakan</h6>
+                    <h3>Rp {{ arrears|intcomma }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <div class="card">
+                <div class="card-header">
+                    Grafik Keuangan
+                </div>
+
+                <div class="card-body">
+                    <canvas id="financeChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header">
+                    Quick Action
+                </div>
+
+                <div class="card-body d-grid gap-2">
+
+                    <a href="{% url 'finance:create-fee' %}"
+                       class="btn btn-primary">
+                        Tambah Iuran
+                    </a>
+
+                    <a href="{% url 'finance:create-expense' %}"
+                       class="btn btn-danger">
+                        Catat Pengeluaran
+                    </a>
+
+                    <a href="{% url 'finance:bill-list' %}"
+                       class="btn btn-success">
+                        Input Pembayaran
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+<form method="post">
+
+    {% csrf_token %}
+
+    <div class="mb-3">
+        {{ form.amount.label_tag }}
+        {{ form.amount }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.notes.label_tag }}
+        {{ form.notes }}
+    </div>
+
+    <button class="btn btn-primary">
+        Simpan
+    </button>
+
+</form>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+            <th>Tanggal</th>
+            <th>Keterangan</th>
+            <th>Jumlah</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for trx in expenses %}
+
+        <tr>
+
+            <td>{{ trx.transaction_date }}</td>
+
+            <td>{{ trx.description }}</td>
+
+            <td>
+                Rp {{ trx.amount }}
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+<li>
+    <a href="{% url 'finance:dashboard' %}">
+        Dashboard
+    </a>
+</li>
+
+<li>
+    <a href="{% url 'finance:bill-list' %}">
+        Rekap Tagihan
+    </a>
+</li>
+
+<li>
+    <a href="{% url 'finance:payment-list' %}">
+        Pembayaran
+    </a>
+</li>
+
+<li>
+    <a href="{% url 'finance:expense-list' %}">
+        Pengeluaran
+    </a>
+</li>
+
+<li>
+    <a href="{% url 'finance:report' %}">
+        Laporan
+    </a>
+</li>
+</div>
+{% endblock content %}

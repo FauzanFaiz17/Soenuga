@@ -147,6 +147,7 @@ class ActivityParticipant(models.Model):
     PARTICIPANT_STATUS = [
         ('hadir', 'Hadir'),
         ('absen', 'Absen'),
+        ('sakit', 'Sakit'),
         ('izin', 'Izin'),
     ]
     

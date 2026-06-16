@@ -1,0 +1,88 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+
+        <div class="d-flex justify-content-between">
+
+            <h5>Rekap Tagihan Anggota</h5>
+
+            <a href=""
+               class="btn btn-success">
+
+                Export Excel
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="card-body table-responsive">
+
+        <table class="table table-bordered table-hover">
+
+            <thead>
+
+                <tr>
+
+                    <th>Nama</th>
+
+                    {% for period in periods %}
+                        <th>{{ period.title }}</th>
+                    {% endfor %}
+
+                    <th>Total</th>
+                    <th>Bayar</th>
+                    <th>Sisa</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for row in summary %}
+
+                <tr>
+
+                    <td>
+                        {{ row.member }}
+                    </td>
+
+                    {% for period in periods %}
+                        <td>
+                            Rp {{ row|get_item:period.title }}
+                        </td>
+                    {% endfor %}
+
+                    <td>
+                        Rp {{ row.total }}
+                    </td>
+
+                    <td>
+                        Rp {{ row.paid }}
+                    </td>
+
+                    <td>
+                        Rp {{ row.remaining }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock content %}

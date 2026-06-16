@@ -1,0 +1,288 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block messages %}
+
+{% if messages %}
+{% for message in messages %} <div class="flex items-center p-4 mb-4 text-sm rounded-lg {{ message.tags }}"
+          role="alert"> <div>{{ message }}</div> </div>
+{% endfor %}
+{% endif %}
+
+{% endblock messages %}
+
+{% block content %}
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+
+<!-- PAGE HEADER -->
+<div class="mb-4 col-span-full xl:mb-2">
+
+    <nav class="flex mb-5" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
+
+            <li class="inline-flex items-center">
+                <a href="{% url 'dashboard' %}"
+                   class="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white">
+
+                    Home
+
+                </a>
+            </li>
+
+            <li>
+                <div class="flex items-center">
+
+                    <svg class="w-6 h-6 text-gray-400"
+                         fill="currentColor"
+                         viewBox="0 0 20 20">
+
+                        <path fill-rule="evenodd"
+                              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                              clip-rule="evenodd"></path>
+
+                    </svg>
+
+                    <a href="{% url 'list_user' %}"
+                       class="ml-1 text-gray-700 hover:text-primary-600 md:ml-2 dark:text-gray-300 dark:hover:text-white">
+
+                        Anggota
+
+                    </a>
+
+                </div>
+            </li>
+
+            <li>
+                <div class="flex items-center">
+
+                    <svg class="w-6 h-6 text-gray-400"
+                         fill="currentColor"
+                         viewBox="0 0 20 20">
+
+                        <path fill-rule="evenodd"
+                              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                              clip-rule="evenodd"></path>
+
+                    </svg>
+
+                    <span class="ml-1 text-gray-400 md:ml-2">
+                        Detail Anggota
+                    </span>
+
+                </div>
+            </li>
+
+        </ol>
+    </nav>
+
+    <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
+        Detail Anggota
+    </h1>
+
+</div>
+
+<!-- LEFT COLUMN -->
+<div class="col-span-full xl:col-auto">
+
+    <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+
+        <div class="items-center sm:flex xl:block 2xl:flex">
+
+            {% if member.foto_profil %}
+                <img src="{{ member.foto_profil.url }}"
+                     class="w-28 h-28 rounded-lg">
+            {% else %}
+                <img src="{% static 'images/default-profile.png' %}"
+                     class="w-28 h-28 rounded-lg">
+            {% endif %}
+
+            <div class="mt-4 sm:ml-4 xl:ml-0 2xl:ml-4">
+
+                <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">
+                    {{ member.get_full_name|default:member.username }}
+                </h3>
+
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ member.profile.nomor_anggota }}
+                </div>
+
+                <div class="mt-2">
+
+                    {% if membership %}
+
+                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+
+                            {{ membership.role.name }}
+
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- RIGHT COLUMN -->
+<div class="col-span-2">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <!-- INFORMASI AKUN -->
+        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">
+                Informasi Akun
+            </h3>
+
+            <div class="grid grid-cols-6 gap-6">
+
+                {% for field in user_form %}
+
+                <div class="col-span-6 sm:col-span-3">
+
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ field.errors.0 }}
+                        </p>
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <!-- INFORMASI MAHASISWA -->
+        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">
+                Informasi Mahasiswa
+            </h3>
+
+            <div class="grid grid-cols-6 gap-6">
+
+                {% for field in profile_form %}
+
+                <div class="col-span-6 sm:col-span-3">
+
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ field.errors.0 }}
+                        </p>
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+                <!-- PROGRAM STUDI -->
+
+                <div class="col-span-6 sm:col-span-3">
+
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        Program Studi
+                    </label>
+
+                    <input type="text"
+                           readonly
+                           value="{{ member.profile.program_studi }}"
+                           class="shadow-sm bg-gray-100 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5">
+
+                </div>
+
+                <!-- NOMOR ANGGOTA -->
+
+                <div class="col-span-6 sm:col-span-3">
+
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        Nomor Anggota
+                    </label>
+
+                    <input type="text"
+                           readonly
+                           value="{{ member.profile.nomor_anggota }}"
+                           class="shadow-sm bg-gray-100 border border-gray-300 text-gray-900 sm:text-sm rounded-lg block w-full p-2.5">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- KEANGGOTAAN -->
+        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">
+                Keanggotaan Organisasi
+            </h3>
+
+            <div class="grid grid-cols-6 gap-6">
+
+                {% for field in membership_form %}
+
+                <div class="col-span-6 sm:col-span-3">
+
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ field.errors.0 }}
+                        </p>
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <!-- BUTTON -->
+
+        <div class="flex justify-end">
+
+            <button type="submit"
+                    class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-6 py-2.5">
+
+                Simpan Perubahan
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+```
+
+</div>
+
+{% endblock content %}

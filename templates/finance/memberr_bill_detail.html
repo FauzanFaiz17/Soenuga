@@ -1,0 +1,75 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="card">
+
+    <div class="card-header">
+        Riwayat Tagihan
+    </div>
+
+    <div class="card-body">
+
+        <table class="table">
+
+            <thead>
+
+                <tr>
+                    <th>Tagihan</th>
+                    <th>Nominal</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for bill in bills %}
+
+                <tr>
+
+                    <td>
+                        {{ bill.fee_period.title }}
+                    </td>
+
+                    <td>
+                        Rp {{ bill.amount }}
+                    </td>
+
+                    <td>
+
+                        {% if bill.status == 'paid' %}
+
+                            <span class="badge bg-success">
+                                Lunas
+                            </span>
+
+                        {% elif bill.status == 'partial' %}
+
+                            <span class="badge bg-warning">
+                                Sebagian
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger">
+                                Belum Bayar
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+{% endblock content %}
