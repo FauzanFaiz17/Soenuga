@@ -1,429 +1,906 @@
 {% extends "layouts/base.html" %}
 {% load static %}
+{% load humanize %}
+
+{% block extrastyle %}
+<style>
+
+:root {
+  --db-bg:          #f5f6fa;
+  --db-surface:     #ffffff;
+  --db-surface-2:   #f8f9fc;
+  --db-border:      #e8eaf0;
+  --db-border-2:    #d1d5e0;
+  --db-text-1:      #111827;
+  --db-text-2:      #4b5563;
+  --db-text-3:      #9ca3af;
+
+  --db-indigo:      #6366f1;
+  --db-indigo-lt:   #eef2ff;
+  --db-violet:      #8b5cf6;
+  --db-violet-lt:   #f5f3ff;
+  --db-teal:        #14b8a6;
+  --db-teal-lt:     #f0fdfa;
+  --db-amber:       #f59e0b;
+  --db-amber-lt:    #fffbeb;
+  --db-rose:        #E02424;
+  --db-rose-lt:     #E02424;
+  --db-emerald:     #10b981;
 
 
+  --db-radius:      14px;
+  --db-radius-sm:   8px;
+  --db-radius-xs:   6px;
+  --db-shadow:      0 1px 3px rgba(0,0,0,.06), 0 1px 8px rgba(0,0,0,.04);
+  --db-shadow-md:   0 4px 16px rgba(0,0,0,.08);
+  --db-transition:  .18s ease;
+}
 
+.dark {
+  --db-bg:          #111827;
+  --db-surface:     #1F2937;
+  --db-surface-2:   #22263a;
+  --db-border:      #2a2f45;
+  --db-border-2:    #353a55;
+  --db-text-1:      #f1f5f9;
+  --db-text-2:      #94a3b8;
+  --db-text-3:      #64748b;
+
+  --db-indigo-lt:   rgba(99,102,241,.15);
+  --db-violet-lt:   rgba(139,92,246,.15);
+  --db-teal-lt:     rgba(20,184,166,.15);
+  --db-amber-lt:    rgba(245,158,11,.15);
+  --db-rose-lt:     rgba(224,36,36);
+  --db-emerald-lt:  rgba(16,185,129,.15);
+  --db-sky-lt:      rgba(56,189,248,.15);
+
+  --db-shadow:      0 1px 3px rgba(0,0,0,.3), 0 1px 8px rgba(0,0,0,.2);
+  --db-shadow-md:   0 4px 16px rgba(0,0,0,.35);
+}
+
+/* ── Reset scoped ── */
+#db-main, #db-main * { box-sizing: border-box; }
+
+/* ── Outer wrapper ── */
+#db-main {
+  background: var(--db-bg);
+  min-height: 100vh;
+  padding: 28px 24px 48px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--db-text-1);
+  transition: background var(--db-transition), color var(--db-transition);
+}
+
+/* ── Page header ── */
+.db-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+.db-header-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--db-indigo); margin-bottom: 4px; }
+.db-header h1 { font-size: 26px; font-weight: 800; line-height: 1.2; color: var(--db-text-1); margin: 0; }
+.db-header h1 span { color: var(--db-indigo); }
+.db-header-sub { margin-top: 4px; font-size: 13px; color: var(--db-text-3); }
+.db-date-chip { flex-shrink: 0; background: var(--db-surface); border: 1px solid var(--db-border); border-radius: var(--db-radius-sm); padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--db-text-2); white-space: nowrap; box-shadow: var(--db-shadow); }
+
+/* ── Grid layouts ── */
+.db-grid-4   { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 20px; }
+.db-grid-3-1 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.db-grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+.db-grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+@media (max-width: 1280px) {
+  .db-grid-4    { grid-template-columns: repeat(2,1fr); }
+  .db-grid-2-1  { grid-template-columns: 1fr; }
+  .db-grid-3-1  { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  #db-main      { padding: 16px 12px 40px; }
+  .db-grid-4    { grid-template-columns: 1fr 1fr; }
+  .db-grid-3-1  { grid-template-columns: 1fr; }
+  .db-grid-2    { grid-template-columns: 1fr; }
+  .db-header h1 { font-size: 20px; }
+}
+@media (max-width: 480px) {
+  .db-grid-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Card base ── */
+.db-card { background: var(--db-surface); border: 1px solid var(--db-border); border-radius: var(--db-radius); padding: 20px; box-shadow: var(--db-shadow); transition: background var(--db-transition), border-color var(--db-transition); position: relative; overflow: hidden; }
+
+/* ── Stat card ── */
+.db-stat { display: flex; flex-direction: column; gap: 14px; }
+.db-stat-orb { position: absolute; top: -28px; right: -28px; width: 80px; height: 80px; border-radius: 50%; opacity: .5; pointer-events: none; }
+.db-stat-icon { width: 40px; height: 40px; border-radius: var(--db-radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 1; }
+.db-stat-icon svg { width: 20px; height: 20px; }
+.db-stat-body { position: relative; z-index: 1; }
+.db-stat-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--db-text-3); margin-bottom: 2px; }
+.db-stat-value { font-size: 30px; font-weight: 800; line-height: 1; color: var(--db-text-1); letter-spacing: -.02em; }
+.db-stat-footer { display: flex; align-items: center; gap: 6px; position: relative; z-index: 1; }
+.db-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.db-badge svg { width: 10px; height: 10px; }
+.db-badge-up   { background: var(--db-emerald-lt); color: var(--db-emerald); }
+.db-badge-down { background: var(--db-rose-lt);    color: var(--db-rose); }
+.db-stat-note  { font-size: 11px; color: var(--db-text-3); }
+
+/* Icon colours */
+.ic-indigo { background: var(--db-indigo-lt); color: var(--db-indigo); }
+.ic-violet { background: var(--db-violet-lt); color: var(--db-violet); }
+.ic-amber  { background: var(--db-amber-lt);  color: var(--db-amber); }
+.ic-teal   { background: var(--db-teal-lt);   color: var(--db-teal); }
+
+/* ── Card head ── */
+.db-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.db-card-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+.db-card-title { font-size: 15px; font-weight: 700; color: var(--db-text-1); margin: 0; }
+.db-card-sub   { font-size: 12px; color: var(--db-text-3); margin-top: 2px; }
+.db-card-link  { flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--db-indigo); text-decoration: none; transition: opacity var(--db-transition); }
+.db-card-link:hover { opacity: .7; }
+
+/* ── Legend ── */
+.db-legend { display: flex; align-items: center; gap: 14px; }
+.db-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--db-text-2); }
+.db-legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Finance strip ── */
+.db-fin-strip { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--db-border); }
+.db-fin-strip-item { text-align: center; padding: 0 8px; }
+.db-fin-strip-item + .db-fin-strip-item { border-left: 1px solid var(--db-border); }
+.db-fin-strip-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--db-text-3); margin-bottom: 3px; }
+.db-fin-strip-val   { font-size: 13px; font-weight: 700; }
+.col-income  { color: var(--db-indigo); }
+.col-expense { color: var(--db-rose); }
+.col-profit  { color: var(--db-emerald); }
+.col-loss    { color: var(--db-rose); }
+
+/* ── Attendance grid ── */
+.db-att-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-top: 16px; }
+.db-att-row  { display: flex; align-items: center; gap: 8px; }
+.db-att-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.db-att-lbl  { font-size: 12px; color: var(--db-text-2); flex: 1; }
+.db-att-val  { font-size: 12px; font-weight: 700; color: var(--db-text-1); }
+
+/* ── Ranking list ── */
+.db-rank-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.db-rank-item { display: flex; align-items: center; gap: 12px; }
+.db-rank-num  { flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--db-radius-xs); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.db-rank-num.gold   { background: #fef3c7; color: #92400e; }
+.db-rank-num.silver { background: var(--db-surface-2); color: var(--db-text-2); border: 1px solid var(--db-border); }
+.db-rank-num.bronze { background: #ffedd5; color: #92400e; }
+.db-rank-num.other  { background: var(--db-surface-2); color: var(--db-text-3); }
+.dark .db-rank-num.gold   { background: rgba(245,158,11,.2);  color: #fcd34d; }
+.dark .db-rank-num.silver { background: var(--db-surface-2);  color: var(--db-text-2); }
+.dark .db-rank-num.bronze { background: rgba(234,88,12,.2);   color: #fb923c; }
+.dark .db-rank-num.other  { background: var(--db-surface-2);  color: var(--db-text-3); }
+.db-rank-info { flex: 1; min-width: 0; }
+.db-rank-name { font-size: 13px; font-weight: 600; color: var(--db-text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-rank-date { font-size: 11px; color: var(--db-text-3); margin-top: 1px; }
+.db-rank-chip { flex-shrink: 0; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+
+/* ── Bill bars ── */
+.db-bill-list  { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.db-bill-row   { display: flex; flex-direction: column; gap: 5px; }
+.db-bill-meta  { display: flex; align-items: center; justify-content: space-between; }
+.db-bill-label { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--db-text-2); }
+.db-bill-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.db-bill-count { font-size: 12px; font-weight: 700; color: var(--db-text-1); }
+.db-bill-track { height: 6px; background: var(--db-surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--db-border); }
+.db-bill-fill  { height: 100%; border-radius: 99px; }
+
+/* ── Empty state ── */
+.db-empty       { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 16px; text-align: center; }
+.db-empty-icon  { width: 48px; height: 48px; border-radius: 12px; background: var(--db-surface-2); border: 1px solid var(--db-border); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.db-empty-icon svg { width: 24px; height: 24px; color: var(--db-text-3); }
+.db-empty-title { font-size: 13px; font-weight: 600; color: var(--db-text-2); margin-bottom: 3px; }
+.db-empty-sub   { font-size: 12px; color: var(--db-text-3); }
+
+/* ── ApexCharts overrides ── */
+.apexcharts-tooltip { background: var(--db-surface) !important; border: 1px solid var(--db-border) !important; border-radius: 10px !important; box-shadow: var(--db-shadow-md) !important; color: var(--db-text-1) !important; }
+.apexcharts-tooltip-title { background: var(--db-surface-2) !important; border-bottom: 1px solid var(--db-border) !important; color: var(--db-text-2) !important; font-size: 12px !important; padding: 6px 12px !important; }
+.apexcharts-xaxistooltip { background: var(--db-surface) !important; border: 1px solid var(--db-border) !important; color: var(--db-text-2) !important; border-radius: 8px !important; }
+</style>
+{% endblock %}
 {% block content %}
+<main>
 
-<div class="container-fluid">
+  {# ── Header ─────────────────────────────────────────────── #}
+  <div class="p-4 bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
+    <div class="w-full mb-1">
+      <div class="mb-4">
+        <nav class="flex mb-5" aria-label="Breadcrumb">
+          <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
+            <li class="inline-flex items-center">
+              <a href="/" class="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white">
+                <svg class="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                Home
+              </a>
+            </li>
+            <li><div class="flex items-center">
+              <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+              <span class="ml-1 text-gray-400 md:ml-2 dark:text-gray-500">Keuangan</span>
+            </div></li>
+          </ol>
+        </nav>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Keuangan Soenuga</h1>
+          <div class="flex gap-2 flex-wrap">
+            <button type="button"
+              data-drawer-target="drawer-manual-trx" data-drawer-show="drawer-manual-trx" data-drawer-placement="right"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Buat Transaksi
+            </button>
+            <button type="button"
+              data-drawer-target="drawer-fee-period" data-drawer-show="drawer-fee-period" data-drawer-placement="right"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-100 focus:ring-4 focus:ring-green-100">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Buat Kas / Iuran
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="d-flex justify-content-between mb-4">
+  <div class="p-4 space-y-6 dark:bg-gray-900">
 
+    {# ── Flash messages ──────────────────────────────────────── #}
+    {% if messages %}
+    <div class="space-y-2">
+      {% for message in messages %}
+      <div class="flex items-center p-4 text-sm rounded-lg
+        {% if message.tags == 'error' %}text-red-800 bg-red-50 dark:bg-red-900 dark:text-red-400
+        {% elif message.tags == 'warning' %}text-yellow-800 bg-yellow-50 dark:bg-yellow-900 dark:text-yellow-300
+        {% else %}text-green-800 bg-green-50 dark:bg-green-900 dark:text-green-400{% endif %}"
+        role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {# ── Kartu Ringkasan ─────────────────────────────────────── #}
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Saldo Kas</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">Rp{{ saldo|floatformat:0 }}</p>
+      </div>
+      <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pemasukan</p>
+        <p class="text-2xl font-bold text-green-500">Rp{{ total_income|floatformat:0 }}</p>
+      </div>
+      <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pengeluaran</p>
+        <p class="text-2xl font-bold text-red-600">Rp{{ total_expense|floatformat:0 }}</p>
+      </div>
+      <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tagihan Belum Lunas</p>
+        <p class="text-2xl font-bold text-orange-800">Rp{{ total_unpaid_bills|floatformat:0 }}</p>
+      </div>
+    </div>
+
+    {# ── Chart Pemasukan vs Pengeluaran ──────────────────────── #}
+    <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+
+
+      <div class="db-card-head">
         <div>
-            <h2 class="fw-bold">
-                Dashboard Keuangan
-            </h2>
-
-            <p class="text-muted">
-                Sistem Manajemen Organisasi SOENUGA
-            </p>
+          <p class="db-card-eyebrow" style="color:var(--db-indigo)">Keuangan</p>
+          <h2 class="db-card-title">6 Bulan Terakhir</h2>
+          <p class="db-card-sub">Pemasukan vs pengeluaran dari transaksi tercatat</p>
         </div>
-
-        <div>
-
-            <a href="#"
-               class="btn btn-primary">
-
-                Tambah Iuran
-
-            </a>
-
-            <a href="#"
-               class="btn btn-success">
-
-                Input Pembayaran
-
-            </a>
-
+        <div class="db-legend">
+          <div class="db-legend-item"><span class="db-legend-dot" style="background:var(--db-indigo)"></span>Pemasukan</div>
+          <div class="db-legend-item"><span class="db-legend-dot" style="background:var(--db-rose)"></span>Pengeluaran</div>
+        </div>
+      </div>
+      <div id="db-chart-keuangan"></div>
+      <div class="db-fin-strip">
+        <div class="db-fin-strip-item">
+          <p class="db-fin-strip-label">Pemasukan</p>
+          <p class="db-fin-strip-val col-income">Rp {{ pemasukan_bulan_ini|floatformat:0|intcomma }}</p>
+        </div>
+        <div class="db-fin-strip-item">
+          <p class="db-fin-strip-label">Pengeluaran</p>
+          <p class="db-fin-strip-val col-expense">Rp {{ pengeluaran_bulan_ini|floatformat:0|intcomma }}</p>
+        </div>
+        <div class="db-fin-strip-item">
+          <p class="db-fin-strip-label">Saldo</p>
+          <p class="db-fin-strip-val {% if saldo >= 0 %}col-profit{% else %}col-loss{% endif %}">Rp {{ saldo|floatformat:0|intcomma }}</p>
         </div>
 
     </div>
 
-    <!-- SUMMARY -->
+    
 
-    <div class="row mb-4">
+  </div>
 
-        <div class="col-md-3">
+    <div id="section-transaksi" class="bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Riwayat Transaksi</h2>
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ transactions.paginator.count }} transaksi</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
+          <thead class="bg-gray-100 dark:bg-gray-700">
+            <tr>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Tanggal</th>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Keterangan</th>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Jenis</th>
+              <th class="p-4 text-xs font-medium text-right text-gray-500 uppercase dark:text-gray-400">Jumlah</th>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Dicatat Oleh</th>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+            {% for trx in transactions %}
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <td class="p-4 text-sm text-gray-900 whitespace-nowrap dark:text-white">{{ trx.transaction_date }}</td>
+              <td class="p-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">{{ trx.description }}</td>
+              <td class="p-4 whitespace-nowrap">
+                {% if trx.transaction_type == 'income' %}
+                  <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">Pemasukan</span>
+                {% else %}
+                  <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full dark:bg-red-900 dark:text-red-300">Pengeluaran</span>
+                {% endif %}
+              </td>
+              <td class="p-4 text-sm font-semibold text-right whitespace-nowrap {% if trx.transaction_type == 'income' %}text-green-600{% else %}text-red-600{% endif %}">
+                {% if trx.transaction_type == 'income' %}+{% else %}-{% endif %}Rp{{ trx.amount|floatformat:0 }}
+              </td>
+              <td class="p-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">
+                {% if trx.created_by %}
+                  {{ trx.created_by.get_full_name|default:trx.created_by.username }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td class="p-4 whitespace-nowrap">
+                {% if not trx.payment and not trx.activity_fine %}
+                <form method="POST" action="{% url 'finance:transaction-delete' trx.pk %}" onsubmit="return confirm('Yakin hapus transaksi ini?')">
+                  {% csrf_token %}
+                  <button type="submit" class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-800">Hapus</button>
+                </form>
+                {% else %}
+                  <span class="text-xs text-gray-400">Otomatis</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="p-6 text-center text-gray-400">Belum ada transaksi.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-            <div class="card shadow-sm border-0">
-
-                <div class="card-body">
-
-                    <h6 class="text-muted">
-                        Saldo Kas
-                    </h6>
-
-                    <h3>
-                        Rp 2.500.000
-                    </h3>
-
-                </div>
-
-            </div>
-
+      {# ── Paginator (pola sama dengan inventory) ──────────────── #}
+      <div class="sticky bottom-0 right-0 items-center w-full p-4 bg-white border-t border-gray-200 flex justify-between dark:bg-gray-800 dark:border-gray-700">
+        <div class="flex items-center mb-4 sm:mb-0">
+          {% if transactions.has_previous %}
+          <a href="?page={{ transactions.previous_page_number }}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_period_id %}&period={{ filter_period_id }}{% endif %}#section-transaksi"
+            class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white">
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+          </a>
+          {% endif %}
+          {% if transactions.has_next %}
+          <a href="?page={{ transactions.next_page_number }}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_period_id %}&period={{ filter_period_id }}{% endif %}#section-transaksi"
+            class="inline-flex justify-center p-1 mr-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white">
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+          </a>
+          {% endif %}
+          <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+            Menampilkan <span class="font-semibold text-gray-900 dark:text-white">{{ transactions.start_index }}–{{ transactions.end_index }}</span>
+            dari <span class="font-semibold text-gray-900 dark:text-white">{{ transactions.paginator.count }}</span>
+          </span>
         </div>
-
-        <div class="col-md-3">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-body">
-
-                    <h6 class="text-muted">
-                        Tunggakan Kas
-                    </h6>
-
-                    <h3>
-                        Rp 320.000
-                    </h3>
-
-                </div>
-
-            </div>
-
+        <div class="flex items-center space-x-3">
+          {% if transactions.has_previous %}
+          <a href="?page={{ transactions.previous_page_number }}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_period_id %}&period={{ filter_period_id }}{% endif %}#section-transaksi"
+            class="inline-flex items-center justify-center flex-1 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-primary-800">
+            <svg class="w-5 h-5 mr-1 -ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Previous
+          </a>
+          {% endif %}
+          {% if transactions.has_next %}
+          <a href="?page={{ transactions.next_page_number }}{% if filter_type %}&type={{ filter_type }}{% endif %}{% if filter_period_id %}&period={{ filter_period_id }}{% endif %}#section-transaksi"
+            class="inline-flex items-center justify-center flex-1 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-primary-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-primary-800">
+            Next
+            <svg class="w-5 h-5 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+          </a>
+          {% endif %}
         </div>
-
-        <div class="col-md-3">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-body">
-
-                    <h6 class="text-muted">
-                        Total Denda
-                    </h6>
-
-                    <h3>
-                        Rp 75.000
-                    </h3>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-md-3">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-body">
-
-                    <h6 class="text-muted">
-                        Transaksi
-                    </h6>
-
-                    <h3>
-                        {{ recent_transactions.count }}
-                    </h3>
-
-                </div>
-
-            </div>
-
-        </div>
-
+      </div>
     </div>
 
-    <!-- ROW -->
-
-    <div class="row">
-
-        <!-- KIRI -->
-
-        <div class="col-lg-8">
-
-            <!-- PERIODE -->
-
-            <div class="card mb-4">
-
-                <div class="card-header">
-
-                    <strong>
-                        Kas & Iuran Aktif
-                    </strong>
-
-                </div>
-
-                <div class="card-body p-0">
-
-                    <table class="table mb-0">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>Nama</th>
-                                <th>Nominal</th>
-                                <th>Jatuh Tempo</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {% for period in fee_periods %}
-
-                            <tr>
-
-                                <td>
-                                    {{ period.title }}
-                                </td>
-
-                                <td>
-                                    Rp {{ period.amount}}
-                                </td>
-
-                                <td>
-                                    {{ period.due_date }}
-                                </td>
-
-                            </tr>
-
-                            {% empty %}
-
-                            <tr>
-
-                                <td colspan="3">
-
-                                    Tidak ada data
-
-                                </td>
-
-                            </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-            <!-- DENDA -->
-
-            <div class="card">
-
-                <div class="card-header">
-
-                    <strong>
-                        Denda Kegiatan
-                    </strong>
-
-                </div>
-
-                <div class="card-body p-0">
-
-                    <table class="table mb-0">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>Anggota</th>
-                                <th>Kegiatan</th>
-                                <th>Tanggal</th>
-                                <th>Status</th>
-                                <th>Denda</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {% for fine in activity_fines %}
-
-                            <tr>
-
-                                <td>
-
-                                    {{ fine.participant.user }}
-
-                                </td>
-
-                                <td>
-
-                                    {{ fine.participant.event.name }}
-
-                                </td>
-
-                                <td>
-
-                                    {{ fine.participant.event.start_date|date:"d M Y" }}
-
-                                </td>
-
-                                <td>
-
-                                    {{ fine.participant.status }}
-
-                                </td>
-
-                                <td>
-
-                                    Rp {{ fine.amount}}
-
-                                </td>
-
-                            </tr>
-
-                            {% empty %}
-
-                            <tr>
-
-                                <td colspan="5">
-
-                                    Belum ada denda
-
-                                </td>
-
-                            </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- KANAN -->
-
-        <div class="col-lg-4">
-
-            <!-- TUNGGAKAN -->
-
-            <div class="card mb-4">
-
-                <div class="card-header">
-
-                    <strong>
-                        Tunggakan Anggota
-                    </strong>
-
-                </div>
-
-                <div class="card-body p-0">
-
-                    <table class="table mb-0">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>Nama</th>
-                                <th>Sisa</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {% for bill in unpaid_bills %}
-
-                            <tr>
-
-                                <td>
-
-                                    {{ bill.member }}
-
-                                </td>
-
-                                <td>
-
-                                    Rp {{ bill.remaining_amount}}
-
-                                </td>
-
-                            </tr>
-
-                            {% empty %}
-
-                            <tr>
-
-                                <td colspan="2">
-
-                                    Tidak ada tunggakan
-
-                                </td>
-
-                            </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-            <!-- TRANSAKSI -->
-
-            <div class="card">
-
-                <div class="card-header">
-
-                    <strong>
-                        Transaksi Terakhir
-                    </strong>
-
-                </div>
-
-                <div class="card-body">
-
-                    {% for trx in recent_transactions %}
-
-                        <div class="border-bottom pb-2 mb-2">
-
-                            <div>
-
-                                <strong>
-
-                                    {{ trx.get_transaction_type_display }}
-
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                Rp {{ trx.amount}}
-
-                            </div>
-
-                            <small class="text-muted">
-
-                                {{ trx.transaction_date }}
-
-                            </small>
-
-                        </div>
-
-                    {% empty %}
-
-                        Tidak ada transaksi.
-
-                    {% endfor %}
-
-                </div>
-
-            </div>
-
-        </div>
-
+    {# ── Rekap Tagihan Anggota ────────────────────────────────── #}
+    <div id="section-tagihan" class="bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 gap-3">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Rekap Tagihan Anggota</h2>
+        <form method="GET" action="#section-tagihan" class="flex items-center gap-2 flex-wrap">
+          <select name="type" onchange="this.form.submit()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <option value="">Semua Jenis</option>
+            <option value="kas"   {% if filter_type == 'kas'   %}selected{% endif %}>Kas Bulanan</option>
+            <option value="iuran" {% if filter_type == 'iuran' %}selected{% endif %}>Iuran</option>
+          </select>
+          <select name="period" onchange="this.form.submit()"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <option value="">Semua Periode</option>
+            {% for p in periods %}
+              <option value="{{ p.pk }}" {% if filter_period_id == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.title }}</option>
+            {% endfor %}
+          </select>
+          {% if filter_type or filter_period_id %}
+          <a href="{% url 'finance:index' %}#section-tagihan"
+            class="px-3 py-2 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">Reset</a>
+          {% endif %}
+        </form>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
+          <thead class="bg-gray-100 dark:bg-gray-700">
+            <tr>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">#</th>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Nama Anggota</th>
+              <th class="p-4 text-xs font-medium text-right text-gray-500 uppercase dark:text-gray-400">Sisa Kas/Iuran</th>
+              <th class="p-4 text-xs font-medium text-right text-gray-500 uppercase dark:text-gray-400">Sisa Denda</th>
+              <th class="p-4 text-xs font-medium text-right text-gray-500 uppercase dark:text-gray-400">Total Sisa</th>
+              <th class="p-4 text-xs font-medium text-right text-gray-500 uppercase dark:text-gray-400">Sudah Bayar</th>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Status</th>
+              <th class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+            {% for m in member_summaries %}
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <td class="p-4 text-sm text-gray-500 dark:text-gray-400">{{ forloop.counter }}</td>
+              <td class="p-4">
+                <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ m.member.get_full_name|default:m.member.username }}</div>
+                <div class="text-xs text-gray-400">{{ m.member.username }}</div>
+              </td>
+
+              {# Sisa Kas/Iuran: tampilkan sisa saja, "-" jika lunas #}
+              <td class="p-4 text-sm text-right whitespace-nowrap">
+                {% if m.bill_remaining > 0 %}
+                  <span class="font-semibold text-red-600">Rp{{ m.bill_remaining|floatformat:0 }}</span>
+                {% else %}
+                  <span class="text-gray-400">—</span>
+                {% endif %}
+              </td>
+
+              {# Sisa Denda: tampilkan sisa saja, "-" jika lunas #}
+              <td class="p-4 text-sm text-right whitespace-nowrap">
+                {% if m.fine_remaining > 0 %}
+                  <span class="font-semibold text-orange-800">Rp{{ m.fine_remaining|floatformat:0 }}</span>
+                {% else %}
+                  <span class="text-gray-400">—</span>
+                {% endif %}
+              </td>
+
+              {# Total Sisa #}
+              <td class="p-4 text-sm font-bold text-right whitespace-nowrap {% if m.grand_remaining > 0 %}text-red-600{% else %}text-gray-400{% endif %}">
+                {% if m.grand_remaining > 0 %}Rp{{ m.grand_remaining|floatformat:0 }}{% else %}—{% endif %}
+              </td>
+
+              {# Sudah Bayar #}
+              <td class="p-4 text-sm font-semibold text-right text-green-500 whitespace-nowrap dark:text-white">
+                {% if m.grand_paid > 0 %}Rp{{ m.grand_paid|floatformat:0 }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+              </td>
+
+              <td class="p-4 whitespace-nowrap">
+                {% if m.status == 'paid' %}
+                  <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">Lunas</span>
+                {% elif m.status == 'partial' %}
+                  <span class="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-00 rounded-full dark:bg-yellow-900 dark:text-white">Sebagian</span>
+                {% else %}
+                  <span class="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full dark:bg-red-900 dark:text-red-300">Belum Bayar</span>
+                {% endif %}
+              </td>
+              <td class="p-4 whitespace-nowrap">
+                {% if m.unpaid_bills or m.unpaid_fines %}
+                <button type="button"
+                  data-drawer-target="drawer-member-pay-{{ m.member.pk }}"
+                  data-drawer-show="drawer-member-pay-{{ m.member.pk }}"
+                  data-drawer-placement="right"
+                  class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-green-400 rounded-lg hover:bg-green-500">
+                  Bayar
+                </button>
+                {% else %}<span class="text-xs text-gray-400">—</span>{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="p-6 text-center text-gray-400">Belum ada data anggota aktif.</td></tr>
+            {% endfor %}
+          </tbody>
+          {% if member_summaries %}
+          <tfoot>
+            <tr class="bg-gray-100 dark:bg-gray-700 font-semibold border-t-2 border-gray-300 dark:border-gray-500">
+              <td colspan="2" class="p-4 text-sm text-gray-900 dark:text-white">Total ({{ member_summaries|length }} anggota)</td>
+              <td colspan="2" class="p-4"></td>
+              <td class="p-4 text-sm text-right text-red-600 whitespace-nowrap font-bold">
+                Rp{{ footer_totals.grand_remaining|floatformat:0 }}
+              </td>
+              <td class="p-4 text-sm text-right text-green-500 whitespace-nowrap font-semibold">
+                Rp{{ footer_totals.grand_paid|floatformat:0 }}
+              </td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+          {% endif %}
+        </table>
+      </div>
     </div>
 
+  </div>{# end p-4 space-y-6 #}
+</main>
+
+
+{# ════════════════════════════════════════════════════════════ #}
+{# DRAWER: Buat Transaksi Manual                               #}
+{# ════════════════════════════════════════════════════════════ #}
+<div id="drawer-manual-trx"
+  class="fixed top-0 right-0 z-40 w-full h-screen max-w-sm p-4 overflow-y-auto transition-transform translate-x-full bg-white dark:bg-gray-800"
+  tabindex="-1" aria-hidden="true">
+  <h5 class="inline-flex items-center mb-1 text-base font-semibold text-gray-500 uppercase dark:text-gray-400">Buat Transaksi</h5>
+  <p class="mb-5 text-sm text-gray-500 dark:text-gray-400">Catat pemasukan (sumbangan, sponsor, dll.) atau pengeluaran kas organisasi.</p>
+  <button type="button" data-drawer-dismiss="drawer-manual-trx" aria-controls="drawer-manual-trx"
+    class="text-gray-400 bg-transparent hover:bg-gray-200 rounded-lg text-sm p-1.5 absolute top-2.5 right-2.5 inline-flex items-center dark:hover:bg-gray-600">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+  </button>
+  <form method="POST" action="{% url 'finance:transaction-create' %}" class="space-y-4">
+    {% csrf_token %}
+    {% for field in manual_trx_form %}
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+      </label>
+      {{ field }}
+      {% for error in field.errors %}<p class="mt-1 text-xs text-red-600">{{ error }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit"
+      class="w-full justify-center text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex items-center">
+      Simpan Transaksi
+    </button>
+  </form>
 </div>
 
+
+{# ════════════════════════════════════════════════════════════ #}
+{# DRAWER: Buat Kas / Iuran                                    #}
+{# ════════════════════════════════════════════════════════════ #}
+<div id="drawer-fee-period"
+  class="fixed top-0 right-0 z-40 w-full h-screen max-w-sm p-4 overflow-y-auto transition-transform translate-x-full bg-white dark:bg-gray-800"
+  tabindex="-1" aria-hidden="true">
+  <h5 class="inline-flex items-center mb-1 text-base font-semibold text-gray-500 uppercase dark:text-gray-400">Buat Periode Kas / Iuran</h5>
+  <p class="mb-5 text-sm text-gray-500 dark:text-gray-400">Tagihan otomatis dibuat untuk semua anggota aktif setelah disimpan.</p>
+  <button type="button" data-drawer-dismiss="drawer-fee-period" aria-controls="drawer-fee-period"
+    class="text-gray-400 bg-transparent hover:bg-gray-200 rounded-lg text-sm p-1.5 absolute top-2.5 right-2.5 inline-flex items-center dark:hover:bg-gray-600">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+  </button>
+  <form method="POST" action="{% url 'finance:fee-period-create' %}" class="space-y-4">
+    {% csrf_token %}
+    {% for field in fee_period_form %}
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+      </label>
+      {{ field }}
+      {% for error in field.errors %}<p class="mt-1 text-xs text-red-600">{{ error }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit"
+              data-drawer-target="drawer-fee-period" data-drawer-show="drawer-fee-period" data-drawer-placement="right"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-100 focus:ring-4 focus:ring-green-100">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Simpan & Generate Tagihan
+            </button>
+  </form>
+</div>
+
+
+{# ════════════════════════════════════════════════════════════ #}
+{# DRAWER: Bayar Tagihan per Anggota                           #}
+{# ════════════════════════════════════════════════════════════ #}
+{% for m in member_summaries %}
+{% if m.unpaid_bills or m.unpaid_fines %}
+<div id="drawer-member-pay-{{ m.member.pk }}"
+  class="fixed top-0 right-0 z-40 w-full h-screen max-w-sm p-4 overflow-y-auto transition-transform translate-x-full bg-white dark:bg-gray-800"
+  tabindex="-1" aria-hidden="true">
+  <h5 class="inline-flex items-center mb-1 text-base font-semibold text-gray-500 uppercase dark:text-gray-400">Bayar Tagihan</h5>
+  <button type="button" data-drawer-dismiss="drawer-member-pay-{{ m.member.pk }}" aria-controls="drawer-member-pay-{{ m.member.pk }}"
+    class="text-gray-400 bg-transparent hover:bg-gray-200 rounded-lg text-sm p-1.5 absolute top-2.5 right-2.5 inline-flex items-center dark:hover:bg-gray-600">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+  </button>
+
+  <div class="mb-4 p-3 bg-gray-50 rounded-lg dark:bg-gray-700">
+    <p class="font-semibold text-gray-900 dark:text-white">{{ m.member.get_full_name|default:m.member.username }}</p>
+    <p class="text-xs text-gray-500 mt-1">Total sisa: <strong class="text-red-600">Rp{{ m.grand_remaining|floatformat:0 }}</strong></p>
+  </div>
+
+  {# Tagihan Kas / Iuran #}
+  {% if m.unpaid_bills %}
+  <p class="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Tagihan Kas / Iuran</p>
+  {% for bill in m.unpaid_bills %}
+  <div class="mb-3 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+    <div class="flex justify-between mb-2">
+      <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ bill.fee_period.title }}</span>
+      <span class="text-sm font-semibold text-red-600">Rp{{ bill.remaining_amount|floatformat:0 }}</span>
+    </div>
+    {# Input teks biasa agar tidak ada constraint browser yang membatasi nilai #}
+    <form method="POST" action="{% url 'finance:bill-pay' bill.pk %}" class="flex gap-2">
+      {% csrf_token %}
+      <input type="text" name="amount" value="{{ bill.remaining_amount|floatformat:0 }}"
+        inputmode="numeric" pattern="[0-9]+"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        placeholder="Jumlah (Rp)" required>
+      <input type="hidden" name="notes" value="">
+      <button type="submit"
+        class="px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 whitespace-nowrap">Bayar</button>
+    </form>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {# Denda Kegiatan #}
+  {% if m.unpaid_fines %}
+  <p class="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Denda Kegiatan</p>
+  {% for fine in m.unpaid_fines %}
+  <div class="mb-3 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3 bg-yellow-50 dark:bg-gray-700">
+    <div class="flex justify-between mb-1">
+      <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ fine.event_name }}</span>
+      <span class="text-sm font-semibold text-red-600">Rp{{ fine.amount|floatformat:0 }}</span>
+    </div>
+    <p class="text-xs text-gray-500 mb-2">
+      {% if fine.participant.status == 'absen' %}Tidak hadir
+      {% elif fine.participant.status == 'izin' %}Izin
+      {% elif fine.participant.status == 'sakit' %}Sakit{% endif %}
+    </p>
+    <form method="POST" action="{% url 'finance:fine-pay' fine.pk %}" class="flex gap-2">
+      {% csrf_token %}
+      <input type="text" name="amount" value="{{ fine.amount|floatformat:0 }}"
+        inputmode="numeric" pattern="[0-9]+"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        placeholder="Jumlah (Rp)" required>
+      <input type="hidden" name="notes" value="">
+      <button type="submit"
+        class="px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 whitespace-nowrap">Bayar</button>
+    </form>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+</div>
+{% endif %}
+{% endfor %}
+
+{% endblock content %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
+<script>
+(function() {
+  var el = document.getElementById('finance-chart');
+  if (!el) return;
+
+  function getFinanceChartOptions() {
+    var isDark = document.documentElement.classList.contains('dark');
+    var colors = isDark
+      ? { borderColor: '#374151', labelColor: '#9CA3AF', opacityFrom: 0,    opacityTo: 0.15 }
+      : { borderColor: '#F3F4F6', labelColor: '#6B7280', opacityFrom: 0.45, opacityTo: 0 };
+
+    return {
+      chart: {
+        height: 380,
+        type: 'area',
+        fontFamily: 'Inter, sans-serif',
+        foreColor: colors.labelColor,
+        toolbar: { show: false },
+      },
+      fill: {
+        type: 'gradient',
+        gradient: { enabled: true, opacityFrom: colors.opacityFrom, opacityTo: colors.opacityTo },
+      },
+      dataLabels: { enabled: false },
+      tooltip: {
+        shared: true,
+        intersect: false,
+        style: { fontSize: '14px', fontFamily: 'Inter, sans-serif' },
+        y: {
+          formatter: function (value) {
+            return 'Rp' + Number(value).toLocaleString('id-ID');
+          },
+        },
+      },
+      grid: {
+        show: true,
+        borderColor: colors.borderColor,
+        strokeDashArray: 1,
+        padding: { left: 35, bottom: 15 },
+      },
+      series: [
+        {
+          name: 'Pemasukan',
+          data: JSON.parse(document.getElementById('income-finance-data').textContent),
+          color: '#1A56DB',
+        },
+        {
+          name: 'Pengeluaran',
+          data: JSON.parse(document.getElementById('expense-finance-data').textContent),
+          color: '#EF4444',
+        },
+      ],
+      markers: { size: 5, strokeColors: '#ffffff', hover: { sizeOffset: 3 } },
+      xaxis: {
+        categories: JSON.parse(document.getElementById('finance-chart-labels').textContent),
+        labels: {
+          style: { colors: [colors.labelColor], fontSize: '13px', fontWeight: 500 },
+        },
+        axisBorder: { color: colors.borderColor },
+        axisTicks: { color: colors.borderColor },
+        crosshairs: {
+          show: true,
+          position: 'back',
+          stroke: { color: colors.borderColor, width: 1, dashArray: 10 },
+        },
+      },
+      yaxis: {
+        labels: {
+          style: { colors: [colors.labelColor], fontSize: '13px', fontWeight: 500 },
+          formatter: function (value) {
+            return 'Rp' + Number(value).toLocaleString('id-ID');
+          },
+        },
+      },
+      legend: {
+        fontSize: '14px',
+        fontWeight: 500,
+        fontFamily: 'Inter, sans-serif',
+        labels: { colors: [colors.labelColor] },
+        itemMargin: { horizontal: 10 },
+      },
+      responsive: [
+        { breakpoint: 1024, options: { xaxis: { labels: { show: false } } } },
+      ],
+    };
+  }
+
+  function renderChart() {
+    if (typeof ApexCharts === 'undefined') {
+      // CDN belum selesai load, coba lagi sebentar
+      return setTimeout(renderChart, 50);
+    }
+    var chart = new ApexCharts(el, getFinanceChartOptions());
+    chart.render();
+
+    document.addEventListener('dark-mode', function () {
+      chart.updateOptions(getFinanceChartOptions());
+    });
+  }
+
+  renderChart();
+})();
+</script>
+<script>
+// Scroll ke anchor dengan offset navbar (agar tidak tertutup)
+(function() {
+  var hash = window.location.hash;
+  if (!hash) return;
+  var target = document.querySelector(hash);
+  if (!target) return;
+
+  // Tunggu sebentar agar layout selesai di-render
+  setTimeout(function() {
+    var navbarHeight = 64; // tinggi navbar Flowbite (sesuaikan jika berbeda)
+    var top = target.getBoundingClientRect().top + window.pageYOffset - navbarHeight - 16;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  }, 100);
+})();
+</script>
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
+<script>
+
+/* ═══════════════════════════════════════════════════════════
+   SOENUGA DASHBOARD — inline chart script
+   ApexCharts dimuat dari CDN di <head> (extrastyle block),
+   sudah tersedia synchronously saat script ini jalan.
+   IndexedDB dinonaktifkan untuk mencegah konflik dengan
+   bundle yang sudah pakai apex versi berbeda.
+   ═══════════════════════════════════════════════════════════ */
+(function () {
+
+  /* Pastikan ApexCharts tersedia */
+  if (typeof ApexCharts === 'undefined') {
+    console.error('SOENUGA: ApexCharts CDN gagal dimuat');
+    return;
+  }
+
+  /* Nonaktifkan IndexedDB storage pada instance CDN ini
+     untuk mencegah "t.put is not a function" dari versi bundle */
+  try {
+    var origIndexedDB = window.indexedDB;
+    Object.defineProperty(window, 'indexedDB', { get: function(){ return null; }, configurable: true });
+    setTimeout(function(){ Object.defineProperty(window, 'indexedDB', { get: function(){ return origIndexedDB; }, configurable: true }); }, 5000);
+  } catch(e) {}
+
+  function isDark() { return document.documentElement.classList.contains('dark'); }
+
+  function tokens() {
+    var dark = isDark();
+    return {
+      text: dark ? '#94a3b8' : '#6b7280',
+      grid: dark ? '#2a2f45' : '#e8eaf0',
+      bg:   dark ? '#1a1d27' : '#ffffff',
+    };
+  }
+
+  function rupiahFmt(v) {
+    if (v >= 1e9) return 'Rp' + (v/1e9).toFixed(1) + 'M';
+    if (v >= 1e6) return 'Rp' + (v/1e6).toFixed(1) + 'jt';
+    if (v >= 1e3) return 'Rp' + (v/1e3).toFixed(0) + 'rb';
+    return 'Rp' + v;
+  }
+
+  var BASE = {
+    toolbar: { show: false },
+    fontFamily: 'Inter, -apple-system, sans-serif',
+    animations: { enabled: false },
+  };
+
+  var charts = {};
+
+  var DATA = {
+    income:     {{ income_data_json|safe }},
+    expense:    {{ expense_data_json|safe }},
+    labels:     {{ months_labels_json|safe }},
+  };
+
+  function buildKeuangan() {
+    
+    var maxIncome = Math.max(...DATA.income);
+    var maxExpense = Math.max(...DATA.expense);
+    var maxValue = Math.max(maxIncome, maxExpense);
+    var t = tokens();
+    var el = document.getElementById('db-chart-keuangan');
+    if (!el) return;
+    if (charts.keuangan) { charts.keuangan.destroy(); }
+    charts.keuangan = new ApexCharts(el, {
+      chart: Object.assign({}, BASE, { type: 'area', height: 200 }),
+      series: [
+        { name: 'Pemasukan',   data: DATA.income },
+        { name: 'Pengeluaran', data: DATA.expense }
+      ],
+      colors: ['#0E9F6E', '#E02424'],
+      fill: { type: 'gradient', gradient: { opacityFrom: 0.22, opacityTo: 0.02 } },
+      stroke: { curve: 'smooth', width: 2.5 },
+      markers: { size: 0, hover: { size: 5 } },
+      xaxis: {
+        categories: DATA.labels,
+        labels: { style: { colors: t.text, fontSize: '11px', fontWeight: 500 } },
+        axisBorder: { show: false }, axisTicks: { show: false }
+      },
+      yaxis: {
+        min: 0,
+        max: maxValue, 
+        labels: { 
+          style: { 
+            colors: t.text, 
+            fontSize: '11px' }, 
+            formatter: rupiahFmt } 
+          },
+      grid: { borderColor: t.grid, strokeDashArray: 3, padding: { left: 0, right: 6, top: -4 } },
+      tooltip: { shared: true, y: { formatter: function(v){ return 'Rp ' + new Intl.NumberFormat('id-ID').format(v); } } },
+      legend: { show: false },
+      dataLabels: { enabled: false }
+    });
+    charts.keuangan.render();
+  }
+
+  buildKeuangan();
+
+
+  /* Re-render saat dark mode toggle */
+  var prevDark = isDark();
+  new MutationObserver(function () {
+    var nowDark = isDark();
+    if (nowDark !== prevDark) {
+      prevDark = nowDark;
+      setTimeout(function() { buildKeuangan();  }, 80);
+    }
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+})();
+</script>
 {% endblock %}

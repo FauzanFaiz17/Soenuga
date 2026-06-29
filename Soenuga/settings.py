@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-hb-^@25rbjky^*&1=!6mcyj3=#9p$h*pt8wd(-=1d%hdt2dk%j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', '192.168.2.217', 'localhost']
 
 
 # Application definition
@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'inventory',
     'activity',
     'finance',
+
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [

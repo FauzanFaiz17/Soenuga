@@ -1,10 +1,12 @@
 
 from django.urls import path
-from .views import test, index,list_user ,role_list,role_create,manage_role_permissions
+from .views import list_user ,role_list,role_create,manage_role_permissions
+from .dashboard import  dashboard
 
 urlpatterns = [
-    path('test/', test, name='test'),
-    path('dashboard/', index, name='dashboard'),
+
+
+    path('dashboard/', dashboard, name='dashboard'),
     path('users/', list_user, name='list_user'),
 
 

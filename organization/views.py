@@ -16,6 +16,12 @@ User = get_user_model()
 
 
 
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
+from finance.models import FinancialTransaction
+import json
+from collections import OrderedDict
+
 def superadmin_required(user):
     return user.is_superuser
 
@@ -153,32 +159,8 @@ def manage_role_permissions(request, role_id):
 
 
 
-@login_required
-def test(request):
-
-    return render(request, 'test.html')
 
 
-@login_required
-def index(request):
-    query = request.GET.get('search', '')  # Ambil query search dari input
-    user_list = User.objects.all()
-
-    if query:
-        user_list = user_list.filter(
-            Q(username__icontains=query) |
-            Q(email__icontains=query)
-        )
-
-    paginator = Paginator(user_list, 10)  # 10 item per halaman
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-
-    return render(request, 'dashboard/index.html' , {
-            'users': page_obj,
-            'search_query': query,
-        })
 
 
 def list_user(request):

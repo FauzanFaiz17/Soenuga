@@ -4,9 +4,7 @@ from django.contrib import messages
 from .forms import CorrespondenceForm
 from django.core.paginator import Paginator
 from django.db.models import Q
-# from django.template.loader import render_to_string
-# from weasyprint import HTML
-# from django.http import HttpResponse
+
 
 def surat(request):
     query = request.GET.get('search', '')
@@ -50,7 +48,7 @@ def update_correspondence(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Data surat berhasil diperbarui.')
-            return redirect('surat')  # atau sesuaikan dengan nama url kamu
+            return redirect('surat') 
         else:
             messages.error(request, 'Terjadi kesalahan saat memperbarui data surat.')
     else:
@@ -71,20 +69,10 @@ def delete_correspondence(request, pk):
     if request.method == 'POST':
         correspondence.delete()  # Ini akan otomatis menghapus foto terkait jika pakai on_delete=CASCADE
         messages.success(request, 'Data Surat berhasil dihapus.')
-        return redirect('surat')  # Ganti sesuai URL list inventaris kamu
+        return redirect('surat')  
 
-    # fallback
     messages.error(request, 'Metode tidak diizinkan.')
     return redirect('surat')
-
-# def export_pdf(request):
-#     data = Correspondence.objects.all()
-#     html_string = render_to_string("correspondence/laporan_pdf.html", {"data": data})
-#     pdf_file = HTML(string=html_string).write_pdf()
-
-#     response = HttpResponse(pdf_file, content_type='application/pdf')
-#     response['Content-Disposition'] = 'attachment; filename="laporan_surat.pdf"'
-#     return response
 
 
 def tambah_surat_keluar(request):

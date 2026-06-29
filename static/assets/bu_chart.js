@@ -81,7 +81,9 @@ const getMainChartOptions = () => {
             }
         },
         xaxis: {
-            categories: labels,
+            categories: JSON.parse(
+                    document.getElementById('finance-chart-labels').textContent
+                ),
             labels: {
                 style: {
                     colors: [mainChartColors.labelColor],
@@ -143,8 +145,8 @@ const getMainChartOptions = () => {
     };
 }
 
-if (document.getElementById('finance-chart')) {
-    const chart = new ApexCharts(document.getElementById('finance-chart'), getMainChartOptions());
+if (document.getElementById('main-chart')) {
+    const chart = new ApexCharts(document.getElementById('main-chart'), getMainChartOptions());
     chart.render();
 
     // init again when toggling dark mode
@@ -393,6 +395,15 @@ const getSignupsChartOptions = () => {
     };
 }
 
+if (document.getElementById('week-signups-chart')) {
+    const chart = new ApexCharts(document.getElementById('week-signups-chart'), getSignupsChartOptions());
+    chart.render();
+
+    // init again when toggling dark mode
+    document.addEventListener('dark-mode', function () {
+        chart.updateOptions(getSignupsChartOptions());
+    });
+}
 
 
 const pieChartOptions = (data) => {
@@ -474,6 +485,123 @@ const pieChartOptions = (data) => {
     };
 }
 
+if (document.getElementById('products-bar-chart-api')) {
+    const apiUrl = '/api/product/';
+    let dt = []
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            dt = data
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+    await fetchData();
+    
+    const options = {
+        colors: ['#1A56DB', '#FDBA8C'],
+        series: [
+            {
+                name: 'Product',
+                color: '#1A56DB',
+                data: dt.map(product => ({ x: product.name, y: product.price }))
+            },
+        ],
+        chart: {
+            type: 'bar',
+            height: '420px',
+            fontFamily: 'Inter, sans-serif',
+            foreColor: '#4B5563',
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                columnWidth: '90%',
+                borderRadius: 3
+            }
+        },
+        tooltip: {
+            shared : true,
+            intersect: false,
+            style: {
+                fontSize: '14px',
+                fontFamily: 'Inter, sans-serif'
+            },
+        },
+        states: {
+            hover: {
+                filter: {
+                    type: 'darken',
+                    value: 1
+                }
+            }
+        },
+        stroke: {
+            show: true,
+            width: 5,
+            colors: ['transparent']
+        },
+        grid: {
+            show: false
+        },
+        dataLabels: {
+            enabled: false
+        },
+        legend: {
+            show: false
+        },
+        xaxis: {
+            floating: false,
+            labels: {
+                show: false
+            },
+            axisBorder: {
+                show: false
+            },
+            axisTicks: {
+                show: false
+            },
+        },
+        yaxis: {
+            show: false
+        },
+        fill: {
+            opacity: 1
+        }
+    };
+
+    const chart = new ApexCharts(document.getElementById('products-bar-chart-api'), options); 
+    chart.render();
+}
+
+if (document.getElementById('products-pie-chart-api')) {
+    const apiUrl = '/api/product/';
+    let dt = []
+
+    const fetchData = async () => {
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            dt = data
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+    await fetchData();
+
+
+    const chart = new ApexCharts(document.getElementById('products-pie-chart-api'), pieChartOptions(dt));
+    chart.render();
+
+    // init again when toggling dark mode
+    document.addEventListener('dark-mode', function () {
+        chart.updateOptions(pieChartOptions(dt));
+    });
+}
 
 // ════════════════════════════════════════════════════════════
 // FINANCE CHART — Halaman Keuangan Soenuga
@@ -481,57 +609,178 @@ const pieChartOptions = (data) => {
 // di template finance/index.html (lihat _get_chart_data di views.py)
 // ════════════════════════════════════════════════════════════
 const labels = JSON.parse(
-    document.getElementById("months-labels").textContent
+    document.getElementById('finance-chart-labels').textContent
 );
 
 const income = JSON.parse(
-    document.getElementById("income-data").textContent
+    document.getElementById('income-finance-data').textContent
 );
 
 const expense = JSON.parse(
-    document.getElementById("expense-data").textContent
+    document.getElementById('expense-finance-data').textContent
 );
 
+const balance = JSON.parse(
+    document.getElementById('balance-finance-data').textContent
+);
 const getFinanceChartOptions = () => {
+    let financeChartColors = {}
+
+    if (document.documentElement.classList.contains('dark')) {
+        financeChartColors = {
+            borderColor: '#374151',
+            labelColor: '#9CA3AF',
+            opacityFrom: 0,
+            opacityTo: 0.15,
+        };
+    } else {
+        financeChartColors = {
+            borderColor: '#F3F4F6',
+            labelColor: '#6B7280',
+            opacityFrom: 0.45,
+            opacityTo: 0,
+        }
+    }
+
     return {
         chart: {
-            type: "line",
-            height: 380
+            height: 380,
+            type: 'area',
+            fontFamily: 'Inter, sans-serif',
+            foreColor: financeChartColors.labelColor,
+            toolbar: {
+                show: false
+            }
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                enabled: true,
+                opacityFrom: financeChartColors.opacityFrom,
+                opacityTo: financeChartColors.opacityTo
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        tooltip: {
+            shared: true,
+            intersect: false,
+            style: {
+                fontSize: '14px',
+                fontFamily: 'Inter, sans-serif',
+            },
+            y: {
+                formatter: function (value) {
+                    return 'Rp' + Number(value).toLocaleString('id-ID');
+                }
+            }
+        },
+        grid: {
+            show: true,
+            borderColor: financeChartColors.borderColor,
+            strokeDashArray: 1,
+            padding: {
+                left: 35,
+                bottom: 15
+            }
         },
         series: [
             {
-                name: "Test",
-                data: [10, 20, 30, 40, 50, 60]
+                name: 'Pemasukan',
+                data: income,
+                color: '#10B981'
+            },
+            {
+                name: 'Pengeluaran',
+                data: expense,
+                color: '#EF4444'
+            },
+            {
+                name: 'Saldo',
+                data: balance,
+                color: '#1A56DB'
             }
         ],
+        markers: {
+            size: 5,
+            strokeColors: '#ffffff',
+            hover: {
+                size: undefined,
+                sizeOffset: 3
+            }
+        },
         xaxis: {
-            categories: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun"]
-        }
+            categories: JSON.parse(
+                document.getElementById('finance-chart-labels').textContent
+            ),
+            labels: {
+                style: {
+                    colors: [financeChartColors.labelColor],
+                    fontSize: '13px',
+                    fontWeight: 500,
+                },
+            },
+            axisBorder: {
+                color: financeChartColors.borderColor,
+            },
+            axisTicks: {
+                color: financeChartColors.borderColor,
+            },
+            crosshairs: {
+                show: true,
+                position: 'back',
+                stroke: {
+                    color: financeChartColors.borderColor,
+                    width: 1,
+                    dashArray: 10,
+                },
+            },
+        },
+        yaxis: {
+            labels: {
+                style: {
+                    colors: [financeChartColors.labelColor],
+                    fontSize: '13px',
+                    fontWeight: 500,
+                },
+                formatter: function (value) {
+                    return 'Rp' + Number(value).toLocaleString('id-ID');
+                }
+            },
+        },
+        legend: {
+            fontSize: '14px',
+            fontWeight: 500,
+            fontFamily: 'Inter, sans-serif',
+            labels: {
+                colors: [financeChartColors.labelColor]
+            },
+            itemMargin: {
+                horizontal: 10
+            }
+        },
+        responsive: [
+            {
+                breakpoint: 1024,
+                options: {
+                    xaxis: {
+                        labels: {
+                            show: false
+                        }
+                    }
+                }
+            }
+        ]
     };
-};
+}
 
-const financeElement = document.getElementById("finance-chart");
+if (document.getElementById('finance-chart')) {
+    const chart = new ApexCharts(document.getElementById('finance-chart'), getFinanceChartOptions());
+    chart.render();
 
-console.log("financeElement:", financeElement);
-
-if (financeElement) {
-
-    console.log("Masuk IF");
-
-    const options = getFinanceChartOptions();
-
-    console.log("Options:", options);
-
-    const chart = new ApexCharts(financeElement, options);
-
-    console.log("Chart dibuat");
-
-    chart.render().then(() => {
-        console.log("Render selesai");
-
-        console.log(financeElement.innerHTML);
-    }).catch(err => {
-        console.error(err);
+    // init again when toggling dark mode
+    document.addEventListener('dark-mode', function () {
+        chart.updateOptions(getFinanceChartOptions());
     });
-
 }

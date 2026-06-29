@@ -1,541 +1,658 @@
 {% extends "layouts/base.html" %}
 {% load static %}
+{% load humanize %}
 
+{% block extrastyle %}
+<style>
+/* ═══════════════════════════════════════════
+   SOENUGA DASHBOARD — Custom CSS
+   Tidak bergantung pada Tailwind/Flowbite
+   Mendukung dark/light mode via .dark class
+   ═══════════════════════════════════════════ */
+
+/* ── Tokens ── */
+:root {
+  --db-bg:          #f5f6fa;
+  --db-surface:     #ffffff;
+  --db-surface-2:   #f8f9fc;
+  --db-border:      #e8eaf0;
+  --db-border-2:    #d1d5e0;
+  --db-text-1:      #111827;
+  --db-text-2:      #4b5563;
+  --db-text-3:      #9ca3af;
+
+  --db-indigo:      #6366f1;
+  --db-indigo-lt:   #eef2ff;
+  --db-violet:      #8b5cf6;
+  --db-violet-lt:   #f5f3ff;
+  --db-teal:        #14b8a6;
+  --db-teal-lt:     #f0fdfa;
+  --db-amber:       #f59e0b;
+  --db-amber-lt:    #fffbeb;
+  --db-rose:        #fb7185;
+  --db-rose-lt:     #fff1f2;
+  --db-emerald:     #10b981;
+  --db-emerald-lt:  #ecfdf5;
+  --db-sky:         #38bdf8;
+  --db-sky-lt:      #f0f9ff;
+
+  --db-radius:      14px;
+  --db-radius-sm:   8px;
+  --db-radius-xs:   6px;
+  --db-shadow:      0 1px 3px rgba(0,0,0,.06), 0 1px 8px rgba(0,0,0,.04);
+  --db-shadow-md:   0 4px 16px rgba(0,0,0,.08);
+  --db-transition:  .18s ease;
+}
+
+.dark {
+  --db-bg:          #111827;
+  --db-surface:     #1F2937;
+  --db-surface-2:   #22263a;
+  --db-border:      #2a2f45;
+  --db-border-2:    #353a55;
+  --db-text-1:      #f1f5f9;
+  --db-text-2:      #94a3b8;
+  --db-text-3:      #64748b;
+
+  --db-indigo-lt:   rgba(99,102,241,.15);
+  --db-violet-lt:   rgba(139,92,246,.15);
+  --db-teal-lt:     rgba(20,184,166,.15);
+  --db-amber-lt:    rgba(245,158,11,.15);
+  --db-rose-lt:     rgba(251,113,133,.15);
+  --db-emerald-lt:  rgba(16,185,129,.15);
+  --db-sky-lt:      rgba(56,189,248,.15);
+
+  --db-shadow:      0 1px 3px rgba(0,0,0,.3), 0 1px 8px rgba(0,0,0,.2);
+  --db-shadow-md:   0 4px 16px rgba(0,0,0,.35);
+}
+
+/* ── Reset scoped ── */
+#db-main, #db-main * { box-sizing: border-box; }
+
+/* ── Outer wrapper ── */
+#db-main {
+  background: var(--db-bg);
+  min-height: 100vh;
+  padding: 28px 24px 48px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--db-text-1);
+  transition: background var(--db-transition), color var(--db-transition);
+}
+
+/* ── Page header ── */
+.db-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+.db-header-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--db-indigo); margin-bottom: 4px; }
+.db-header h1 { font-size: 26px; font-weight: 800; line-height: 1.2; color: var(--db-text-1); margin: 0; }
+.db-header h1 span { color: var(--db-indigo); }
+.db-header-sub { margin-top: 4px; font-size: 13px; color: var(--db-text-3); }
+.db-date-chip { flex-shrink: 0; background: var(--db-surface); border: 1px solid var(--db-border); border-radius: var(--db-radius-sm); padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--db-text-2); white-space: nowrap; box-shadow: var(--db-shadow); }
+
+/* ── Grid layouts ── */
+.db-grid-4   { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 20px; }
+.db-grid-3-1 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.db-grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+.db-grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+@media (max-width: 1280px) {
+  .db-grid-4    { grid-template-columns: repeat(2,1fr); }
+  .db-grid-2-1  { grid-template-columns: 1fr; }
+  .db-grid-3-1  { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  #db-main      { padding: 16px 12px 40px; }
+  .db-grid-4    { grid-template-columns: 1fr 1fr; }
+  .db-grid-3-1  { grid-template-columns: 1fr; }
+  .db-grid-2    { grid-template-columns: 1fr; }
+  .db-header h1 { font-size: 20px; }
+}
+@media (max-width: 480px) {
+  .db-grid-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Card base ── */
+.db-card { background: var(--db-surface); border: 1px solid var(--db-border); border-radius: var(--db-radius); padding: 20px; box-shadow: var(--db-shadow); transition: background var(--db-transition), border-color var(--db-transition); position: relative; overflow: hidden; }
+
+/* ── Stat card ── */
+.db-stat { display: flex; flex-direction: column; gap: 14px; }
+.db-stat-orb { position: absolute; top: -28px; right: -28px; width: 80px; height: 80px; border-radius: 50%; opacity: .5; pointer-events: none; }
+.db-stat-icon { width: 40px; height: 40px; border-radius: var(--db-radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 1; }
+.db-stat-icon svg { width: 20px; height: 20px; }
+.db-stat-body { position: relative; z-index: 1; }
+.db-stat-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--db-text-3); margin-bottom: 2px; }
+.db-stat-value { font-size: 30px; font-weight: 800; line-height: 1; color: var(--db-text-1); letter-spacing: -.02em; }
+.db-stat-footer { display: flex; align-items: center; gap: 6px; position: relative; z-index: 1; }
+.db-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.db-badge svg { width: 10px; height: 10px; }
+.db-badge-up   { background: var(--db-emerald-lt); color: var(--db-emerald); }
+.db-badge-down { background: var(--db-rose-lt);    color: var(--db-rose); }
+.db-stat-note  { font-size: 11px; color: var(--db-text-3); }
+
+/* Icon colours */
+.ic-indigo { background: var(--db-indigo-lt); color: var(--db-indigo); }
+.ic-violet { background: var(--db-violet-lt); color: var(--db-violet); }
+.ic-amber  { background: var(--db-amber-lt);  color: var(--db-amber); }
+.ic-teal   { background: var(--db-teal-lt);   color: var(--db-teal); }
+
+/* ── Card head ── */
+.db-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.db-card-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+.db-card-title { font-size: 15px; font-weight: 700; color: var(--db-text-1); margin: 0; }
+.db-card-sub   { font-size: 12px; color: var(--db-text-3); margin-top: 2px; }
+.db-card-link  { flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--db-indigo); text-decoration: none; transition: opacity var(--db-transition); }
+.db-card-link:hover { opacity: .7; }
+
+/* ── Legend ── */
+.db-legend { display: flex; align-items: center; gap: 14px; }
+.db-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--db-text-2); }
+.db-legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Finance strip ── */
+.db-fin-strip { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--db-border); }
+.db-fin-strip-item { text-align: center; padding: 0 8px; }
+.db-fin-strip-item + .db-fin-strip-item { border-left: 1px solid var(--db-border); }
+.db-fin-strip-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--db-text-3); margin-bottom: 3px; }
+.db-fin-strip-val   { font-size: 13px; font-weight: 700; }
+.col-income  { color: var(--db-indigo); }
+.col-expense { color: var(--db-rose); }
+.col-profit  { color: var(--db-emerald); }
+.col-loss    { color: var(--db-rose); }
+
+/* ── Attendance grid ── */
+.db-att-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-top: 16px; }
+.db-att-row  { display: flex; align-items: center; gap: 8px; }
+.db-att-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.db-att-lbl  { font-size: 12px; color: var(--db-text-2); flex: 1; }
+.db-att-val  { font-size: 12px; font-weight: 700; color: var(--db-text-1); }
+
+/* ── Ranking list ── */
+.db-rank-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.db-rank-item { display: flex; align-items: center; gap: 12px; }
+.db-rank-num  { flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--db-radius-xs); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.db-rank-num.gold   { background: #fef3c7; color: #92400e; }
+.db-rank-num.silver { background: var(--db-surface-2); color: var(--db-text-2); border: 1px solid var(--db-border); }
+.db-rank-num.bronze { background: #ffedd5; color: #92400e; }
+.db-rank-num.other  { background: var(--db-surface-2); color: var(--db-text-3); }
+.dark .db-rank-num.gold   { background: rgba(245,158,11,.2);  color: #fcd34d; }
+.dark .db-rank-num.silver { background: var(--db-surface-2);  color: var(--db-text-2); }
+.dark .db-rank-num.bronze { background: rgba(234,88,12,.2);   color: #fb923c; }
+.dark .db-rank-num.other  { background: var(--db-surface-2);  color: var(--db-text-3); }
+.db-rank-info { flex: 1; min-width: 0; }
+.db-rank-name { font-size: 13px; font-weight: 600; color: var(--db-text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-rank-date { font-size: 11px; color: var(--db-text-3); margin-top: 1px; }
+.db-rank-chip { flex-shrink: 0; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+
+/* ── Bill bars ── */
+.db-bill-list  { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.db-bill-row   { display: flex; flex-direction: column; gap: 5px; }
+.db-bill-meta  { display: flex; align-items: center; justify-content: space-between; }
+.db-bill-label { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--db-text-2); }
+.db-bill-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.db-bill-count { font-size: 12px; font-weight: 700; color: var(--db-text-1); }
+.db-bill-track { height: 6px; background: var(--db-surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--db-border); }
+.db-bill-fill  { height: 100%; border-radius: 99px; }
+
+/* ── Agenda ── */
+.db-agenda-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.db-agenda-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--db-radius-sm); border: 1px solid var(--db-border); background: var(--db-surface-2); transition: background var(--db-transition), border-color var(--db-transition); }
+.db-agenda-item:hover { background: var(--db-indigo-lt); border-color: var(--db-border-2); }
+.db-date-badge { flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+.db-date-badge .db-d { font-size: 15px; font-weight: 800; margin-bottom: 1px; }
+.db-date-badge .db-m { font-size: 10px; font-weight: 600; opacity: .8; }
+.db-agenda-info { flex: 1; min-width: 0; }
+.db-agenda-name { font-size: 13px; font-weight: 600; color: var(--db-text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-agenda-loc  { font-size: 11px; color: var(--db-text-3); margin-top: 2px; }
+.db-agenda-status { flex-shrink: 0; padding: 3px 9px; border-radius: 99px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.status-ongoing  { background: var(--db-emerald-lt); color: var(--db-emerald); }
+.status-upcoming { background: var(--db-sky-lt);     color: var(--db-sky); }
+
+/* Badge acara/kegiatan */
+.badge-acara    { background: var(--db-violet-lt); color: var(--db-violet); }
+.badge-kegiatan { background: var(--db-teal-lt);   color: var(--db-teal); }
+
+/* ── Empty state ── */
+.db-empty       { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 16px; text-align: center; }
+.db-empty-icon  { width: 48px; height: 48px; border-radius: 12px; background: var(--db-surface-2); border: 1px solid var(--db-border); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.db-empty-icon svg { width: 24px; height: 24px; color: var(--db-text-3); }
+.db-empty-title { font-size: 13px; font-weight: 600; color: var(--db-text-2); margin-bottom: 3px; }
+.db-empty-sub   { font-size: 12px; color: var(--db-text-3); }
+
+/* ── ApexCharts overrides ── */
+.apexcharts-tooltip { background: var(--db-surface) !important; border: 1px solid var(--db-border) !important; border-radius: 10px !important; box-shadow: var(--db-shadow-md) !important; color: var(--db-text-1) !important; }
+.apexcharts-tooltip-title { background: var(--db-surface-2) !important; border-bottom: 1px solid var(--db-border) !important; color: var(--db-text-2) !important; font-size: 12px !important; padding: 6px 12px !important; }
+.apexcharts-xaxistooltip { background: var(--db-surface) !important; border: 1px solid var(--db-border) !important; color: var(--db-text-2) !important; border-radius: 8px !important; }
+</style>
+{% endblock %}
 
 {% block content %}
+<main id="db-main">
 
-<main>
-  <div class="px-4 pt-6">
-    <div class="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-      <!-- Main widget -->
-       <div
-        class="items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:flex dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <div class="w-full">
-          <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">New products</h3>
-          <span class="text-2xl font-bold leading-none text-gray-900 sm:text-3xl dark:text-white">2,340</span>
-          <p class="flex items-center text-base font-normal text-gray-500 dark:text-gray-400">
-            <span class="flex items-center mr-1.5 text-sm text-green-500 dark:text-green-400">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true">
-                <path clip-rule="evenodd" fill-rule="evenodd"
-                  d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z">
-                </path>
-              </svg>
-              12.5%
-            </span>
-            Since last month
-          </p>
-        </div>
-        <div class="w-full" id="new-products-chart"></div>
-      </div>
-      <div
-        class="items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:flex dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <div class="w-full">
-          <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Users</h3>
-          <span class="text-2xl font-bold leading-none text-gray-900 sm:text-3xl dark:text-white">2,340</span>
-          <p class="flex items-center text-base font-normal text-gray-500 dark:text-gray-400">
-            <span class="flex items-center mr-1.5 text-sm text-green-500 dark:text-green-400">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true">
-                <path clip-rule="evenodd" fill-rule="evenodd"
-                  d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z">
-                </path>
-              </svg>
-              3,4%
-            </span>
-            Since last month
-          </p>
-        </div>
-        <div class="w-full" id="week-signups-chart"></div>
-      </div>
-      <div
-        class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <div class="w-full">
-          <h3 class="mb-2 text-base font-normal text-gray-500 dark:text-gray-400">Audience by age</h3>
-          <div class="flex items-center mb-2">
-            <div class="w-16 text-sm font-medium dark:text-white">50+</div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-              <div class="bg-primary-600 h-2.5 rounded-full dark:bg-primary-500" style="width: 100%"></div>
-            </div>
-          </div>
-          <div class="flex items-center mb-2">
-            <div class="w-16 text-sm font-medium dark:text-white">40+</div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-              <div class="bg-primary-600 h-2.5 rounded-full dark:bg-primary-500" style="width: 15%"></div>
-            </div>
-          </div>
-          <div class="flex items-center mb-2">
-            <div class="w-16 text-sm font-medium dark:text-white">30+</div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-              <div class="bg-primary-600 h-2.5 rounded-full dark:bg-primary-500" style="width: 60%"></div>
-            </div>
-          </div>
-          <div class="flex items-center mb-2">
-            <div class="w-16 text-sm font-medium dark:text-white">20+</div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-              <div class="bg-primary-600 h-2.5 rounded-full dark:bg-primary-500" style="width: 30%"></div>
-            </div>
-          </div>
-        </div>
-        <div id="traffic-channels-chart" class="w-full"></div>
-      </div>
-      <div
-        class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex-shrink-0">
-            <span class="text-xl font-bold leading-none text-gray-900 sm:text-2xl dark:text-white">$45,385</span>
-            <h3 class="text-base font-light text-gray-500 dark:text-gray-400">Sales this week</h3>
-          </div>
-          <div
-            class="flex items-center justify-end flex-1 text-base font-medium text-green-500 dark:text-green-400">
-            12.5%
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd"
-                d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"></path>
-            </svg>
-          </div>
-        </div>
-        <div id="main-chart"></div>
-        <!-- Card Footer -->
-        <div
-          class="flex items-center justify-between pt-3 mt-4 border-t border-gray-200 sm:pt-6 dark:border-gray-700">
-          <div>
-            <button
-              class="inline-flex items-center p-2 text-sm font-medium text-center text-gray-500 rounded-lg hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              type="button" data-dropdown-toggle="weekly-sales-dropdown">Last 7 days <svg class="w-4 h-4 ml-2"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg></button>
-            <!-- Dropdown menu -->
-            <div
-              class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-              id="weekly-sales-dropdown">
-              <div class="px-4 py-3" role="none">
-                <p class="text-sm font-medium text-gray-900 truncate dark:text-white" role="none">
-                  Sep 16, 2021 - Sep 22, 2021
-                </p>
-              </div>
-              <ul class="py-1" role="none">
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Yesterday</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Today</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Last 7 days</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Last 30 days</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Last 90 days</a>
-                </li>
-              </ul>
-              <div class="py-1" role="none">
-                <a href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                  role="menuitem">Custom...</a>
-              </div>
-            </div>
-          </div>
-          <div class="flex-shrink-0">
-            <a href="#"
-              class="inline-flex items-center p-2 text-xs font-medium uppercase rounded-lg text-primary-700 sm:text-sm hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
-              Sales Report
-              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-      <!--Tabs widget -->
-      <div
-        class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <h3 class="flex items-center mb-4 text-lg font-semibold text-gray-900 dark:text-white">Statistics this
-          month
-          <button data-popover-target="popover-description" data-popover-placement="bottom-end" type="button"><svg
-              class="w-4 h-4 ml-2 text-gray-400 hover:text-gray-500" aria-hidden="true" fill="currentColor"
-              viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                clip-rule="evenodd"></path>
-            </svg><span class="sr-only">Show information</span></button>
-        </h3>
-        <div data-popover id="popover-description" role="tooltip"
-          class="absolute z-10 invisible inline-block text-sm font-light text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
-          <div class="p-3 space-y-2">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Statistics</h3>
-            <p>Statistics is a branch of applied mathematics that involves the collection, description, analysis,
-              and inference of conclusions from quantitative data.</p>
-            <a href="#"
-              class="flex items-center font-medium text-primary-600 dark:text-primary-500 dark:hover:text-primary-600 hover:text-primary-700">Read
-              more <svg class="w-4 h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clip-rule="evenodd"></path>
-              </svg></a>
-          </div>
-          <div data-popper-arrow></div>
-        </div>
-        <div class="sm:hidden">
-          <label for="tabs" class="sr-only">Select tab</label>
-          <select id="tabs"
-            class="bg-gray-50 border-0 border-b border-gray-200 text-gray-900 text-sm rounded-t-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-            <option>Statistics</option>
-            <option>Services</option>
-            <option>FAQ</option>
-          </select>
-        </div>
-        <ul
-          class="hidden text-sm font-medium text-center text-gray-500 divide-x divide-gray-200 rounded-lg sm:flex dark:divide-gray-600 dark:text-gray-400"
-          id="fullWidthTab" data-tabs-toggle="#fullWidthTabContent" role="tablist">
-          <li class="w-full">
-            <button id="faq-tab" data-tabs-target="#faq" type="button" role="tab" aria-controls="faq"
-              aria-selected="true"
-              class="inline-block w-full p-4 rounded-tl-lg bg-gray-50 hover:bg-gray-100 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600">Top
-              products</button>
-          </li>
-          <li class="w-full">
-            <button id="about-tab" data-tabs-target="#about" type="button" role="tab" aria-controls="about"
-              aria-selected="false"
-              class="inline-block w-full p-4 rounded-tr-lg bg-gray-50 hover:bg-gray-100 focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600">Top
-              Customers</button>
-          </li>
-        </ul>
-        <div id="fullWidthTabContent" class="border-t border-gray-200 dark:border-gray-600">
-          <div class="hidden pt-4" id="faq" role="tabpanel" aria-labelledby="faq-tab">
-            <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center min-w-0">
-                    <img class="flex-shrink-0 w-10 h-10"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/products/iphone.png"
-                      alt="imac image">
-                    <div class="ml-3">
-                      <p class="font-medium text-gray-900 truncate dark:text-white">
-                        iPhone 14 Pro
-                      </p>
-                      <div
-                        class="flex items-center justify-end flex-1 text-sm text-green-500 dark:text-green-400">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path clip-rule="evenodd" fill-rule="evenodd"
-                            d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z">
-                          </path>
-                        </svg>
-                        2.5%
-                        <span class="ml-2 text-gray-500">vs last month</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $445,467
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center min-w-0">
-                    <img class="flex-shrink-0 w-10 h-10"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/products/imac.png" alt="imac image">
-                    <div class="ml-3">
-                      <p class="font-medium text-gray-900 truncate dark:text-white">
-                        Apple iMac 27"
-                      </p>
-                      <div
-                        class="flex items-center justify-end flex-1 text-sm text-green-500 dark:text-green-400">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path clip-rule="evenodd" fill-rule="evenodd"
-                            d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z">
-                          </path>
-                        </svg>
-                        12.5%
-                        <span class="ml-2 text-gray-500">vs last month</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $256,982
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center min-w-0">
-                    <img class="flex-shrink-0 w-10 h-10"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/products/watch.png"
-                      alt="watch image">
-                    <div class="ml-3">
-                      <p class="font-medium text-gray-900 truncate dark:text-white">
-                        Apple Watch SE
-                      </p>
-                      <div class="flex items-center justify-end flex-1 text-sm text-red-600 dark:text-red-500">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path clip-rule="evenodd" fill-rule="evenodd"
-                            d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z">
-                          </path>
-                        </svg>
-                        1.35%
-                        <span class="ml-2 text-gray-500">vs last month</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $201,869
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center min-w-0">
-                    <img class="flex-shrink-0 w-10 h-10"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/products/ipad.png" alt="ipad image">
-                    <div class="ml-3">
-                      <p class="font-medium text-gray-900 truncate dark:text-white">
-                        Apple iPad Air
-                      </p>
-                      <div
-                        class="flex items-center justify-end flex-1 text-sm text-green-500 dark:text-green-400">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path clip-rule="evenodd" fill-rule="evenodd"
-                            d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z">
-                          </path>
-                        </svg>
-                        12.5%
-                        <span class="ml-2 text-gray-500">vs last month</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $103,967
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center min-w-0">
-                    <img class="flex-shrink-0 w-10 h-10"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/products/imac.png" alt="imac image">
-                    <div class="ml-3">
-                      <p class="font-medium text-gray-900 truncate dark:text-white">
-                        Apple iMac 24"
-                      </p>
-                      <div class="flex items-center justify-end flex-1 text-sm text-red-600 dark:text-red-500">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path clip-rule="evenodd" fill-rule="evenodd"
-                            d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z">
-                          </path>
-                        </svg>
-                        2%
-                        <span class="ml-2 text-gray-500">vs last month</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $98,543
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-          <div class="hidden pt-4" id="about" role="tabpanel" aria-labelledby="about-tab">
-            <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center space-x-4">
-                  <div class="flex-shrink-0">
-                    <img class="w-8 h-8 rounded-full"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/users/neil-sims.png"
-                      alt="Neil image">
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate dark:text-white">
-                      Neil Sims
-                    </p>
-                    <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                      email@flowbite.com
-                    </p>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $3320
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center space-x-4">
-                  <div class="flex-shrink-0">
-                    <img class="w-8 h-8 rounded-full"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/users/bonnie-green.png"
-                      alt="Neil image">
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate dark:text-white">
-                      Bonnie Green
-                    </p>
-                    <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                      email@flowbite.com
-                    </p>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $2467
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center space-x-4">
-                  <div class="flex-shrink-0">
-                    <img class="w-8 h-8 rounded-full"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/users/michael-gough.png"
-                      alt="Neil image">
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate dark:text-white">
-                      Michael Gough
-                    </p>
-                    <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                      email@flowbite.com
-                    </p>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $2235
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center space-x-4">
-                  <div class="flex-shrink-0">
-                    <img class="w-8 h-8 rounded-full"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/users/thomas-lean.png"
-                      alt="Neil image">
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate dark:text-white">
-                      Thomes Lean
-                    </p>
-                    <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                      email@flowbite.com
-                    </p>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $1842
-                  </div>
-                </div>
-              </li>
-              <li class="py-3 sm:py-4">
-                <div class="flex items-center space-x-4">
-                  <div class="flex-shrink-0">
-                    <img class="w-8 h-8 rounded-full"
-                      src="https://flowbite-admin-dashboard.vercel.app/images/users/lana-byrd.png"
-                      alt="Neil image">
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate dark:text-white">
-                      Lana Byrd
-                    </p>
-                    <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                      email@flowbite.com
-                    </p>
-                  </div>
-                  <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    $1044
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <!-- Card Footer -->
-        <div
-          class="flex items-center justify-between pt-3 mt-5 border-t border-gray-200 sm:pt-6 dark:border-gray-700">
-          <div>
-            <button
-              class="inline-flex items-center p-2 text-sm font-medium text-center text-gray-500 rounded-lg hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              type="button" data-dropdown-toggle="stats-dropdown">Last 7 days <svg class="w-4 h-4 ml-2"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg></button>
-            <!-- Dropdown menu -->
-            <div
-              class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-              id="stats-dropdown">
-              <div class="px-4 py-3" role="none">
-                <p class="text-sm font-medium text-gray-900 truncate dark:text-white" role="none">
-                  Sep 16, 2021 - Sep 22, 2021
-                </p>
-              </div>
-              <ul class="py-1" role="none">
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Yesterday</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Today</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Last 7 days</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Last 30 days</a>
-                </li>
-                <li>
-                  <a href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem">Last 90 days</a>
-                </li>
-              </ul>
-              <div class="py-1" role="none">
-                <a href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white"
-                  role="menuitem">Custom...</a>
-              </div>
-            </div>
-          </div>
-          <div class="flex-shrink-0">
-            <a href="#"
-              class="inline-flex items-center p-2 text-xs font-medium uppercase rounded-lg text-primary-700 sm:text-sm hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
-              Full Report
-              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
+  {# ── Header ── #}
+  <div class="db-header">
+    <div>
+      <p class="db-header-eyebrow">SOENUGA · Dashboard</p>
+      <h1>Selamat datang, <span>{{ request.user.get_full_name|default:request.user.username }}</span> 👋</h1>
+      <p class="db-header-sub">Ringkasan aktivitas organisasi — diperbarui hari ini</p>
     </div>
-
-    <div class="grid w-full grid-cols-1 gap-4 mt-4 xl:grid-cols-2 2xl:grid-cols-3">
-      
-
-    </div>
-
-    
+    <div class="db-date-chip">{% now "d F Y" %}</div>
   </div>
+
+  {# ── Stat Cards ── #}
+  <div class="db-grid-4">
+
+    <div class="db-card db-stat">
+      <div class="db-stat-orb" style="background:var(--db-indigo-lt)"></div>
+      <div class="db-stat-icon ic-indigo">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+      <div class="db-stat-body">
+        <p class="db-stat-label">Total Anggota</p>
+        <p class="db-stat-value">{{ total_anggota }}</p>
+      </div>
+      <div class="db-stat-footer">
+        {% if anggota_growth >= 0 %}<span class="db-badge db-badge-up"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"/></svg>{{ anggota_growth }}%</span>
+        {% else %}<span class="db-badge db-badge-down"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>{{ anggota_growth }}%</span>
+        {% endif %}
+        <span class="db-stat-note">vs bulan lalu</span>
+      </div>
+    </div>
+
+    <div class="db-card db-stat">
+      <div class="db-stat-orb" style="background:var(--db-violet-lt)"></div>
+      <div class="db-stat-icon ic-violet">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </div>
+      <div class="db-stat-body">
+        <p class="db-stat-label">Total Event</p>
+        <p class="db-stat-value">{{ total_event }}</p>
+      </div>
+      <div class="db-stat-footer">
+        {% if event_growth >= 0 %}<span class="db-badge db-badge-up"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"/></svg>{{ event_growth }}%</span>
+        {% else %}<span class="db-badge db-badge-down"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>{{ event_growth }}%</span>
+        {% endif %}
+        <span class="db-stat-note">vs bulan lalu</span>
+      </div>
+    </div>
+
+    <div class="db-card db-stat">
+      <div class="db-stat-orb" style="background:var(--db-amber-lt)"></div>
+      <div class="db-stat-icon ic-amber">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      </div>
+      <div class="db-stat-body">
+        <p class="db-stat-label">Item Inventaris</p>
+        <p class="db-stat-value">{{ total_inventory }}</p>
+      </div>
+      <div class="db-stat-footer"><span class="db-stat-note">Total item tercatat</span></div>
+    </div>
+
+    <div class="db-card db-stat">
+      <div class="db-stat-orb" style="background:var(--db-teal-lt)"></div>
+      <div class="db-stat-icon ic-teal">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      </div>
+      <div class="db-stat-body">
+        <p class="db-stat-label">Surat</p>
+        <p class="db-stat-value">{{ total_surat }}</p>
+      </div>
+      <div class="db-stat-footer"><span class="db-stat-note">Masuk &amp; keluar</span></div>
+    </div>
+
+  </div>
+
+  {# ── Keuangan + Kehadiran ── #}
+  <div class="db-grid-2-1">
+
+    <div class="db-card">
+      <div class="db-card-head">
+        <div>
+          <p class="db-card-eyebrow" style="color:var(--db-indigo)">Keuangan</p>
+          <h2 class="db-card-title">6 Bulan Terakhir</h2>
+          <p class="db-card-sub">Pemasukan vs pengeluaran dari transaksi tercatat</p>
+        </div>
+        <div class="db-legend">
+          <div class="db-legend-item"><span class="db-legend-dot" style="background:var(--db-indigo)"></span>Pemasukan</div>
+          <div class="db-legend-item"><span class="db-legend-dot" style="background:var(--db-rose)"></span>Pengeluaran</div>
+        </div>
+      </div>
+      <div id="db-chart-keuangan"></div>
+      <div class="db-fin-strip">
+        <div class="db-fin-strip-item">
+          <p class="db-fin-strip-label">Pemasukan</p>
+          <p class="db-fin-strip-val col-income">Rp {{ pemasukan_bulan_ini|floatformat:0|intcomma }}</p>
+        </div>
+        <div class="db-fin-strip-item">
+          <p class="db-fin-strip-label">Pengeluaran</p>
+          <p class="db-fin-strip-val col-expense">Rp {{ pengeluaran_bulan_ini|floatformat:0|intcomma }}</p>
+        </div>
+        <div class="db-fin-strip-item">
+          <p class="db-fin-strip-label">Saldo</p>
+          <p class="db-fin-strip-val {% if saldo >= 0 %}col-profit{% else %}col-loss{% endif %}">Rp {{ saldo|floatformat:0|intcomma }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="db-card" style="display:flex;flex-direction:column">
+      <div class="db-card-head" style="margin-bottom:8px">
+        <div>
+          <p class="db-card-eyebrow" style="color:var(--db-emerald)">Absensi</p>
+          <h2 class="db-card-title">Kehadiran Bulan Ini</h2>
+        </div>
+      </div>
+      <div id="db-chart-hadir"></div>
+      <div class="db-att-grid">
+        <div class="db-att-row"><span class="db-att-dot" style="background:var(--db-emerald)"></span><span class="db-att-lbl">Hadir</span><span class="db-att-val">{{ kehadiran_hadir }}</span></div>
+        <div class="db-att-row"><span class="db-att-dot" style="background:var(--db-rose)"></span><span class="db-att-lbl">Absen</span><span class="db-att-val">{{ kehadiran_absen }}</span></div>
+        <div class="db-att-row"><span class="db-att-dot" style="background:var(--db-amber)"></span><span class="db-att-lbl">Izin</span><span class="db-att-val">{{ kehadiran_izin }}</span></div>
+        <div class="db-att-row"><span class="db-att-dot" style="background:var(--db-sky)"></span><span class="db-att-lbl">Sakit</span><span class="db-att-val">{{ kehadiran_sakit }}</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  {# ── Top Acara + Top Kegiatan + Tagihan ── #}
+  <div class="db-grid-3-1">
+
+    <div class="db-card">
+      <div class="db-card-head">
+        <div><p class="db-card-eyebrow" style="color:var(--db-violet)">Aktivitas</p><h2 class="db-card-title">Top Acara</h2></div>
+        <a href="{% url 'event_list' %}" class="db-card-link">Semua →</a>
+      </div>
+      {% if top_acara %}
+      <ul class="db-rank-list">
+        {% for acara in top_acara %}
+        <li class="db-rank-item">
+          <span class="db-rank-num {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% else %}other{% endif %}">{{ forloop.counter }}</span>
+          <div class="db-rank-info"><div class="db-rank-name">{{ acara.name }}</div><div class="db-rank-date">{{ acara.start_date|date:"d M Y" }}</div></div>
+          <span class="db-rank-chip badge-acara">{{ acara.peserta_count }} peserta</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="db-empty"><div class="db-empty-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div><p class="db-empty-title">Belum ada acara</p></div>
+      {% endif %}
+    </div>
+
+    <div class="db-card">
+      <div class="db-card-head">
+        <div><p class="db-card-eyebrow" style="color:var(--db-teal)">Rutin</p><h2 class="db-card-title">Top Kegiatan</h2></div>
+        <a href="{% url 'event_list' %}" class="db-card-link">Semua →</a>
+      </div>
+      {% if top_kegiatan %}
+      <ul class="db-rank-list">
+        {% for kegiatan in top_kegiatan %}
+        <li class="db-rank-item">
+          <span class="db-rank-num {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% else %}other{% endif %}">{{ forloop.counter }}</span>
+          <div class="db-rank-info"><div class="db-rank-name">{{ kegiatan.name }}</div><div class="db-rank-date">{{ kegiatan.start_date|date:"d M Y" }}</div></div>
+          <span class="db-rank-chip badge-kegiatan">{{ kegiatan.hadir_count }} hadir</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="db-empty"><div class="db-empty-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><p class="db-empty-title">Belum ada kegiatan</p></div>
+      {% endif %}
+    </div>
+
+    <div class="db-card">
+      <div class="db-card-head" style="margin-bottom:14px">
+        <div><p class="db-card-eyebrow" style="color:var(--db-amber)">Iuran</p><h2 class="db-card-title">Status Tagihan</h2></div>
+      </div>
+      {% with total=tagihan_lunas|add:tagihan_sebagian|add:tagihan_belum %}
+      <div class="db-bill-list">
+        <div class="db-bill-row">
+          <div class="db-bill-meta"><div class="db-bill-label"><span class="db-bill-dot" style="background:var(--db-emerald)"></span>Lunas</div><span class="db-bill-count">{{ tagihan_lunas }}</span></div>
+          <div class="db-bill-track"><div class="db-bill-fill" style="width:{% if total > 0 %}{% widthratio tagihan_lunas total 100 %}{% else %}0{% endif %}%;background:var(--db-emerald)"></div></div>
+        </div>
+        <div class="db-bill-row">
+          <div class="db-bill-meta"><div class="db-bill-label"><span class="db-bill-dot" style="background:var(--db-amber)"></span>Sebagian</div><span class="db-bill-count">{{ tagihan_sebagian }}</span></div>
+          <div class="db-bill-track"><div class="db-bill-fill" style="width:{% if total > 0 %}{% widthratio tagihan_sebagian total 100 %}{% else %}0{% endif %}%;background:var(--db-amber)"></div></div>
+        </div>
+        <div class="db-bill-row">
+          <div class="db-bill-meta"><div class="db-bill-label"><span class="db-bill-dot" style="background:var(--db-rose)"></span>Belum Bayar</div><span class="db-bill-count">{{ tagihan_belum }}</span></div>
+          <div class="db-bill-track"><div class="db-bill-fill" style="width:{% if total > 0 %}{% widthratio tagihan_belum total 100 %}{% else %}0{% endif %}%;background:var(--db-rose)"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--db-border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--db-text-3)">Total tagihan</span>
+        <span style="font-size:15px;font-weight:800;color:var(--db-text-1)">{{ total }}</span>
+      </div>
+      {% endwith %}
+    </div>
+
+  </div>
+
+  {# ── Agenda + Distribusi Unit ── #}
+  <div class="db-grid-2">
+
+    <div class="db-card">
+      <div class="db-card-head">
+        <div><p class="db-card-eyebrow" style="color:var(--db-sky)">Jadwal</p><h2 class="db-card-title">Agenda Mendatang</h2></div>
+        <a href="{% url 'event_list' %}" class="db-card-link">Semua →</a>
+      </div>
+      {% if upcoming_events %}
+      <ul class="db-agenda-list">
+        {% for event in upcoming_events %}
+        <li class="db-agenda-item">
+          <div class="db-date-badge {% if event.tipe == 'acara' %}badge-acara{% else %}badge-kegiatan{% endif %}">
+            <span class="db-d">{{ event.start_date|date:"d" }}</span>
+            <span class="db-m">{{ event.start_date|date:"M" }}</span>
+          </div>
+          <div class="db-agenda-info">
+            <div class="db-agenda-name">{{ event.name }}</div>
+            <div class="db-agenda-loc">{{ event.lokasi|default:"—" }}</div>
+          </div>
+          <span class="db-agenda-status {% if event.status == 'ongoing' %}status-ongoing{% else %}status-upcoming{% endif %}">
+            {% if event.status == 'ongoing' %}Berlangsung{% else %}Upcoming{% endif %}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="db-empty">
+        <div class="db-empty-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+        <p class="db-empty-title">Tidak ada agenda mendatang</p>
+        <p class="db-empty-sub">Tambah event baru untuk mulai melacak jadwal</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="db-card">
+      <div class="db-card-head" style="margin-bottom:8px">
+        <div>
+          <p class="db-card-eyebrow" style="color:var(--db-indigo)">Organisasi</p>
+          <h2 class="db-card-title">Anggota per Departemen</h2>
+          <p class="db-card-sub">Distribusi anggota aktif</p>
+        </div>
+      </div>
+      <div id="db-chart-unit"></div>
+    </div>
+
+  </div>
+
 </main>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
+<script>
+
+/* ═══════════════════════════════════════════════════════════
+   SOENUGA DASHBOARD — inline chart script
+   ApexCharts dimuat dari CDN di <head> (extrastyle block),
+   sudah tersedia synchronously saat script ini jalan.
+   IndexedDB dinonaktifkan untuk mencegah konflik dengan
+   bundle yang sudah pakai apex versi berbeda.
+   ═══════════════════════════════════════════════════════════ */
+(function () {
+
+  /* Pastikan ApexCharts tersedia */
+  if (typeof ApexCharts === 'undefined') {
+    console.error('SOENUGA: ApexCharts CDN gagal dimuat');
+    return;
+  }
+
+  /* Nonaktifkan IndexedDB storage pada instance CDN ini
+     untuk mencegah "t.put is not a function" dari versi bundle */
+  try {
+    var origIndexedDB = window.indexedDB;
+    Object.defineProperty(window, 'indexedDB', { get: function(){ return null; }, configurable: true });
+    setTimeout(function(){ Object.defineProperty(window, 'indexedDB', { get: function(){ return origIndexedDB; }, configurable: true }); }, 5000);
+  } catch(e) {}
+
+  function isDark() { return document.documentElement.classList.contains('dark'); }
+
+  function tokens() {
+    var dark = isDark();
+    return {
+      text: dark ? '#94a3b8' : '#6b7280',
+      grid: dark ? '#2a2f45' : '#e8eaf0',
+      bg:   dark ? '#1a1d27' : '#ffffff',
+    };
+  }
+
+  function rupiahFmt(v) {
+    if (v >= 1e9) return 'Rp' + (v/1e9).toFixed(1) + 'M';
+    if (v >= 1e6) return 'Rp' + (v/1e6).toFixed(1) + 'jt';
+    if (v >= 1e3) return 'Rp' + (v/1e3).toFixed(0) + 'rb';
+    return 'Rp' + v;
+  }
+
+  var BASE = {
+    toolbar: { show: false },
+    fontFamily: 'Inter, -apple-system, sans-serif',
+    animations: { enabled: false },
+  };
+
+  var charts = {};
+
+  var DATA = {
+    income:     {{ income_data_json|safe }},
+    expense:    {{ expense_data_json|safe }},
+    labels:     {{ months_labels_json|safe }},
+    hadir:      {{ kehadiran_hadir }},
+    absen:      {{ kehadiran_absen }},
+    izin:       {{ kehadiran_izin }},
+    sakit:      {{ kehadiran_sakit }},
+    unitLabels: {{ unit_labels_json|safe }},
+    unitCounts: {{ unit_counts_json|safe }},
+  };
+
+  function buildKeuangan() {
+    
+    var maxIncome = Math.max(...DATA.income);
+    var maxExpense = Math.max(...DATA.expense);
+    var maxValue = Math.max(maxIncome, maxExpense);
+    var t = tokens();
+    var el = document.getElementById('db-chart-keuangan');
+    if (!el) return;
+    if (charts.keuangan) { charts.keuangan.destroy(); }
+    charts.keuangan = new ApexCharts(el, {
+      chart: Object.assign({}, BASE, { type: 'area', height: 200 }),
+      series: [
+        { name: 'Pemasukan',   data: DATA.income },
+        { name: 'Pengeluaran', data: DATA.expense }
+      ],
+      colors: ['#6366f1', '#fb7185'],
+      fill: { type: 'gradient', gradient: { opacityFrom: 0.22, opacityTo: 0.02 } },
+      stroke: { curve: 'smooth', width: 2.5 },
+      markers: { size: 0, hover: { size: 5 } },
+      xaxis: {
+        categories: DATA.labels,
+        labels: { style: { colors: t.text, fontSize: '11px', fontWeight: 500 } },
+        axisBorder: { show: false }, axisTicks: { show: false }
+      },
+      yaxis: {
+        min: 0,
+        max: maxValue, 
+        labels: { 
+          style: { 
+            colors: t.text, 
+            fontSize: '11px' }, 
+            formatter: rupiahFmt } 
+          },
+      grid: { borderColor: t.grid, strokeDashArray: 3, padding: { left: 0, right: 6, top: -4 } },
+      tooltip: { shared: true, y: { formatter: function(v){ return 'Rp ' + new Intl.NumberFormat('id-ID').format(v); } } },
+      legend: { show: false },
+      dataLabels: { enabled: false }
+    });
+    charts.keuangan.render();
+  }
+
+  function buildHadir() {
+    var t = tokens();
+    var el = document.getElementById('db-chart-hadir');
+    if (!el) return;
+    if (charts.hadir) { charts.hadir.destroy(); }
+    var total = DATA.hadir + DATA.absen + DATA.izin + DATA.sakit;
+    charts.hadir = new ApexCharts(el, {
+      chart: Object.assign({}, BASE, { type: 'donut', height: 190 }),
+      series: total > 0 ? [DATA.hadir, DATA.absen, DATA.izin, DATA.sakit] : [1],
+      labels: total > 0 ? ['Hadir', 'Absen', 'Izin', 'Sakit'] : ['Belum ada data'],
+      colors: total > 0 ? ['#10b981', '#fb7185', '#f59e0b', '#38bdf8'] : ['#e5e7eb'],
+      legend: { show: false },
+      dataLabels: { enabled: false },
+      stroke: { width: 3, colors: [t.bg] },
+      plotOptions: {
+        pie: { donut: { size: '70%', labels: {
+          show: total > 0,
+          total: { show: true, label: 'Total', fontSize: '12px', fontWeight: 700, color: t.text, formatter: function(){ return total; } },
+          value: { fontSize: '18px', fontWeight: 800, color: '#6366f1' }
+        }}}
+      },
+      tooltip: { enabled: total > 0 }
+    });
+    charts.hadir.render();
+  }
+
+  function buildUnit() {
+    var t = tokens();
+    var el = document.getElementById('db-chart-unit');
+    if (!el) return;
+    if (charts.unit) { charts.unit.destroy(); }
+    if (!DATA.unitLabels || DATA.unitLabels.length === 0) {
+      el.innerHTML = '<div class="db-empty"><div class="db-empty-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div><p class="db-empty-title">Belum ada data departemen</p></div>';
+      return;
+    }
+    charts.unit = new ApexCharts(el, {
+      chart: Object.assign({}, BASE, { type: 'bar', height: 210 }),
+      series: [{ name: 'Anggota Aktif', data: DATA.unitCounts }],
+      colors: ['#6366f1'],
+      xaxis: {
+        categories: DATA.unitLabels,
+        labels: { style: { colors: t.text, fontSize: '11px', fontWeight: 500 }, rotate: -15 },
+        axisBorder: { show: false }, axisTicks: { show: false }
+      },
+      yaxis: { 
+        labels: { 
+          style: { 
+            colors: t.text, 
+            fontSize: '11px' 
+          } 
+        }, 
+        min: 0 },
+      plotOptions: { bar: { borderRadius: 6, columnWidth: '48%' } },
+      grid: { borderColor: t.grid, strokeDashArray: 3 },
+      dataLabels: { enabled: false },
+      fill: { type: 'gradient', gradient: { shade: 'light', type: 'vertical', gradientToColors: ['#a5b4fc'], opacityFrom: 1, opacityTo: 0.55 } },
+      tooltip: { y: { formatter: function(v){ return v + ' anggota'; } } }
+    });
+    charts.unit.render();
+  }
+
+  buildKeuangan();
+  buildHadir();
+  buildUnit();
+
+  /* Re-render saat dark mode toggle */
+  var prevDark = isDark();
+  new MutationObserver(function () {
+    var nowDark = isDark();
+    if (nowDark !== prevDark) {
+      prevDark = nowDark;
+      setTimeout(function() { buildKeuangan(); buildHadir(); buildUnit(); }, 80);
+    }
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+})();
+</script>
+{% endblock %}
 
 {% endblock content %}
