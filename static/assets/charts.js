@@ -480,6 +480,7 @@ const pieChartOptions = (data) => {
 // Sumber data: hidden <script id="..."> yang di-render Django
 // di template finance/index.html (lihat _get_chart_data di views.py)
 // ════════════════════════════════════════════════════════════
+
 const labels = JSON.parse(
     document.getElementById("months-labels").textContent
 );
